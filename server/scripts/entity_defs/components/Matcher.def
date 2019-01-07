@@ -1,0 +1,38 @@
+<root>
+	<Properties>
+		<minPlayers>
+			<Type>				PLAYERS_NUM			</Type>
+			<Flags>				BASE				</Flags>
+		</minPlayers>
+		<maxPlayers>
+			<Type>				PLAYERS_NUM			</Type>
+			<Flags>				BASE				</Flags>
+		</maxPlayers>
+		<matchTime>
+			<Type>				MATCHTIME			</Type>
+			<Flags>				BASE				</Flags>
+		</matchTime>
+		<loadTimeToOpenRoom>
+			<Type>				INT32				</Type>
+			<Flags>				BASE				</Flags>
+		</loadTimeToOpenRoom>
+	</Properties>
+
+	<BaseMethods>
+		<onRoomGetCell>
+			<Arg>				ENTITYCALL			</Arg>
+			<Arg>				MATCH_ID			</Arg>
+			<Arg>				SPACE_ID			</Arg>
+		</onRoomGetCell>
+		<onRoomDestory>
+			<Arg>				MATCH_ID			</Arg>
+			<Arg>				SPACE_ID			</Arg>
+		</onRoomDestory>
+	</BaseMethods>
+
+	<CellMethods>
+	</CellMethods>
+
+	<ClientMethods>
+	</ClientMethods>
+</root>

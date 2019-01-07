@@ -1,0 +1,422 @@
+<root>
+	<OBJECT_ID>			INT32		</OBJECT_ID>
+	<BOOL>				UINT8		</BOOL>
+	<DBID>				UINT64		</DBID>
+	<UID>				UINT64		</UID>
+	<ENTITY_ID>			INT32		</ENTITY_ID>
+	<ROLE_ID>			UINT8		</ROLE_ID>
+	<WEAPON_ID>			INT32		</WEAPON_ID>
+	<NAME>				UNICODE		</NAME>
+	<TEAM_ID>			INT32		</TEAM_ID>
+	<HERO_ID>			INT32		</HERO_ID>
+	<SPACE_ID>			UINT32		</SPACE_ID>
+	<ROOMPOSITION_ID>	UINT32		</ROOMPOSITION_ID>
+	<POSITION3D>		VECTOR3		</POSITION3D>
+	<DIRECTION3D>		VECTOR3		</DIRECTION3D>
+	<SPACE_KEY>			UINT64		</SPACE_KEY>
+	<ROOMSTATE>			INT32		</ROOMSTATE>
+	<FRAMEID>			UINT32		</FRAMEID>
+	<CMD_TYPE>			UINT8		</CMD_TYPE>
+	<PLAYERS_NUM>		INT32		</PLAYERS_NUM>
+	<MATCH_ID>			UINT32		</MATCH_ID>
+	<MATCHTIME>			INT32		</MATCHTIME>
+	<HERO_IDS_LIST> ARRAY <of> INT32 </of> </HERO_IDS_LIST>
+
+	<HERO_INFOS>	FIXED_DICT
+		<Properties>
+			<id>
+				<Type>	INT32	</Type>
+			</id>
+			<name>
+				<Type>	UNICODE	</Type>
+			</name>
+			<nick_name>
+				<Type>	UNICODE	</Type>
+			</nick_name>
+			<race>
+				<Type>	INT32	</Type>
+			</race>
+			<race_desc>
+				<Type>	UNICODE	</Type>
+			</race_desc>
+			<skill_1>
+				<Type>	INT32	</Type>
+			</skill_1>
+			<skill_2>
+				<Type>	INT32	</Type>
+			</skill_2>
+			<skill_3>
+				<Type>	INT32	</Type>
+			</skill_3>
+			<skill_4>
+				<Type>	INT32	</Type>
+			</skill_4>
+			<hero_hp>
+				<Type>	INT32	</Type>
+			</hero_hp>
+			<hero_mp>
+				<Type>	INT32	</Type>
+			</hero_mp>
+			<hero_strength>
+				<Type>	INT32	</Type>
+			</hero_strength>
+			<hero_agile>
+				<Type>	INT32	</Type>
+			</hero_agile>
+			<hero_intelligence>
+				<Type>	INT32	</Type>
+			</hero_intelligence>
+			<hero_attacktime>
+				<Type>	INT32	</Type>
+			</hero_attacktime>
+			<hero_speed>
+				<Type>	INT32	</Type>
+			</hero_speed>
+			<hero_attackfront>
+				<Type>	INT32	</Type>
+			</hero_attackfront>
+			<hero_attackback>
+				<Type>	INT32	</Type>
+			</hero_attackback>
+			<hero_skillfront>
+				<Type>	INT32	</Type>
+			</hero_skillfront>
+			<hero_skillback>
+				<Type>	INT32	</Type>
+			</hero_skillback>
+			<hero_scope>
+				<Type>	INT32	</Type>
+			</hero_scope>
+			<hero_attack>
+				<Type>	INT32	</Type>
+			</hero_attack>
+			<hero_armor>
+				<Type>	INT32	</Type>
+			</hero_armor>
+			<hero_unarmor>
+				<Type>	INT32	</Type>
+			</hero_unarmor>
+			<hero_magic>
+				<Type>	INT32	</Type>
+			</hero_magic>
+			<hero_magicresist>
+				<Type>	INT32	</Type>
+			</hero_magicresist>
+			<hero_hprestored>
+				<Type>	INT32	</Type>
+			</hero_hprestored>
+			<hero_mprestored>
+				<Type>	INT32	</Type>
+			</hero_mprestored>
+			<hero_crit>
+				<Type>	INT32	</Type>
+			</hero_crit>
+			<hero_uncrit>
+				<Type>	INT32	</Type>
+			</hero_uncrit>
+			<hero_critunmber>
+				<Type>	INT32	</Type>
+			</hero_critunmber>
+			<hero_evade>
+				<Type>	INT32	</Type>
+			</hero_evade>
+			<hero_unevade>
+				<Type>	INT32	</Type>
+			</hero_unevade>
+			<hero_parry>
+				<Type>	INT32	</Type>
+			</hero_parry>
+			<hero_unparry>
+				<Type>	INT32	</Type>
+			</hero_unparry>
+			<hero_parrynumber>
+				<Type>	INT32	</Type>
+			</hero_parrynumber>
+			<hero_xixue>
+				<Type>	INT32	</Type>
+			</hero_xixue>
+			<atk_power>
+				<Type>	INT32	</Type>
+			</atk_power>
+			<hurt_power>
+				<Type>	INT32	</Type>
+			</hurt_power>
+			<kill_power>
+				<Type>	INT32	</Type>
+			</kill_power>
+			<hero_energe>
+				<Type>	INT32	</Type>
+			</hero_energe>
+		</Properties>
+	</HERO_INFOS>
+
+	<SKILL_INFOS>	FIXED_DICT
+		<Properties>
+			<id>
+				<Type>	INT32	</Type>
+			</id>
+			<name>
+				<Type>	UNICODE	</Type>
+			</name>
+			<skill_icon>
+				<Type>	UNICODE	</Type>
+			</skill_icon>
+			<skill_damage_chushi>
+				<Type>	INT32	</Type>
+			</skill_damage_chushi>
+			<skill_damage_growth>
+				<Type>	INT32	</Type>
+			</skill_damage_growth>
+			<skill_ad_chushi>
+				<Type>	INT32	</Type>
+			</skill_ad_chushi>
+			<skill_ad_growth>
+				<Type>	INT32	</Type>
+			</skill_ad_growth>
+			<skill_ap_chushi>
+				<Type>	INT32	</Type>
+			</skill_ap_chushi>
+			<skill_ap_growth>
+				<Type>	INT32	</Type>
+			</skill_ap_growth>
+			<skill_type>
+				<Type>	INT32	</Type>
+			</skill_type>
+			<skill_ongoing>
+				<Type>	INT32	</Type>
+			</skill_ongoing>
+			<skill_sing_time>
+				<Type>	INT32	</Type>
+			</skill_sing_time>
+			<skill_cutdown>
+				<Type>	INT32	</Type>
+			</skill_cutdown>
+			<skill_cutdownif>
+				<Type>	INT32	</Type>
+			</skill_cutdownif>
+			<skill_cd>
+				<Type>	INT32	</Type>
+			</skill_cd>
+		</Properties>
+	</SKILL_INFOS>
+
+	<SKILL_INFOS_LIST> ARRAY <of> SKILL_INFOS </of> </SKILL_INFOS_LIST>
+
+	<SHOP_INFOS>	FIXED_DICT
+		<Properties>
+			<shop_id>
+				<Type>	INT32	</Type>
+			</shop_id>
+			<shop_des>
+				<Type>	UNICODE	</Type>
+			</shop_des>
+			<shop_refreshstart>
+				<Type>	INT32	</Type>
+			</shop_refreshstart>
+			<shop_refreshtime>
+				<Type>	INT32	</Type>
+			</shop_refreshtime>
+			<shop_needid>
+				<Type>	INT32	</Type>
+			</shop_needid>
+			<shop_needdes>
+				<Type>	UNICODE	</Type>
+			</shop_needdes>
+			<shop_amount>
+				<Type>	INT32	</Type>
+			</shop_amount>
+			<shop_refreshtime1>
+				<Type>	UNICODE	</Type>
+			</shop_refreshtime1>
+			<open_lv>
+				<Type>	INT32	</Type>
+			</open_lv>
+		</Properties>
+	</SHOP_INFOS>
+
+	<SHOP_INFOS_LIST> ARRAY <of> SHOP_INFOS </of> </SHOP_INFOS_LIST>
+
+	<PROPS_INFOS>	FIXED_DICT
+		<Properties>
+			<prop_id>
+				<Type>	INT32	</Type>
+			</prop_id>
+			<prop_name>
+				<Type>	UNICODE	</Type>
+			</prop_name>
+			<prop_icon>
+				<Type>	UNICODE	</Type>
+			</prop_icon>
+			<prop_type>
+				<Type>	INT32	</Type>
+			</prop_type>
+			<prop_quality>
+				<Type>	INT32	</Type>
+			</prop_quality>
+			<prop_order>
+				<Type>	INT32	</Type>
+			</prop_order>
+			<prop_max>
+				<Type>	INT32	</Type>
+			</prop_max>
+			<prop_resale>
+				<Type>	INT32	</Type>
+			</prop_resale>
+			<prop_diamond>
+				<Type>	INT32	</Type>
+			</prop_diamond>
+			<prop_hanbing>
+				<Type>	INT32	</Type>
+			</prop_hanbing>
+			<prop_moba>
+				<Type>	INT32	</Type>
+			</prop_moba>
+			<prop_jjc>
+				<Type>	INT32	</Type>
+			</prop_jjc>
+			<prop_maoxian>
+				<Type>	INT32	</Type>
+			</prop_maoxian>
+			<prop_describe>
+				<Type>	UNICODE	</Type>
+			</prop_describe>
+			<prop_function>
+				<Type>	INT32	</Type>
+			</prop_function>
+			<prop_parameters1>
+				<Type>	INT32	</Type>
+			</prop_parameters1>
+			<prop_parameters2>
+				<Type>	INT32	</Type>
+			</prop_parameters2>
+			<prop_parameters3>
+				<Type>	INT32	</Type>
+			</prop_parameters3>
+			<prop_parameters4>
+				<Type>	INT32	</Type>
+			</prop_parameters4>
+			<prop_parameters5>
+				<Type>	INT32	</Type>
+			</prop_parameters5>
+			<prop_parameters6>
+				<Type>	INT32	</Type>
+			</prop_parameters6>
+			<prop_drop1>
+				<Type>	INT32	</Type>
+			</prop_drop1>
+			<prop_drop2>
+				<Type>	INT32	</Type>
+			</prop_drop2>
+			<prop_drop3>
+				<Type>	INT32	</Type>
+			</prop_drop3>
+			<prop_drop4>
+				<Type>	INT32	</Type>
+			</prop_drop4>
+			<prop_gm>
+				<Type>	INT32	</Type>
+			</prop_gm>
+			<prop_buy>
+				<Type>	INT32	</Type>
+			</prop_buy>
+		</Properties>
+	</PROPS_INFOS>
+
+	<PROPS_INFOS_LIST> ARRAY <of> PROPS_INFOS </of> </PROPS_INFOS_LIST>
+
+	<AVATAR_INFOS>	FIXED_DICT
+		<implementedBy>AVATAR_INFOS.avatar_info_inst</implementedBy>
+		<Properties>
+			<dbid>
+				<Type>	DBID	</Type>
+			</dbid>
+			<name>
+				<Type>	NAME	</Type>
+				<DatabaseLength> 256 </DatabaseLength>
+			</name>
+			<roleType>
+				<Type>	ROLE_ID	</Type>
+			</roleType>
+			<weaponId>
+				<Type>	WEAPON_ID	</Type>
+			</weaponId>
+		</Properties>
+	</AVATAR_INFOS>
+
+	<AVATAR_INFOS_LIST>	FIXED_DICT
+		<implementedBy>AVATAR_INFOS.avatar_info_list_inst</implementedBy>
+		<Properties>
+			<values>
+				<Type>	ARRAY <of> AVATAR_INFOS </of>	</Type>
+			</values>
+		</Properties>
+	</AVATAR_INFOS_LIST>
+
+	<MATCHING_INFOS>	FIXED_DICT
+		<implementedBy>MATCHING_INFOS.matching_info_inst</implementedBy>
+		<Properties>
+			<id>
+				<Type>	ENTITY_ID	</Type>
+			</id>
+			<name>
+				<Type>	NAME	</Type>
+				<DatabaseLength> 256 </DatabaseLength>
+			</name>
+			<teamId>
+				<Type>	INT32	</Type>
+			</teamId>
+			<heroId>
+				<Type>	INT32	</Type>
+			</heroId>
+			<heroIdLst>
+				<Type>	ARRAY <of> INT32 </of>	</Type>
+			</heroIdLst>
+		</Properties>
+	</MATCHING_INFOS>
+
+	<MATCHING_INFOS_LIST>	FIXED_DICT
+		<implementedBy>MATCHING_INFOS.matching_info_list_inst</implementedBy>
+		<Properties>
+			<values>
+				<Type>	ARRAY <of> MATCHING_INFOS </of>	</Type>
+			</values>
+		</Properties>
+	</MATCHING_INFOS_LIST>
+
+
+	<FS_ENTITY_DATA>	FIXED_DICT
+		<implementedBy>FS_ENTITY_DATA.inst</implementedBy>
+		<Properties>
+			<entityid>
+				<Type>	ENTITY_ID	</Type>
+			</entityid>
+			<cmd_type>
+				<Type>	CMD_TYPE	</Type>
+			</cmd_type>
+			<datas>
+				<Type>	BLOB	</Type>
+			</datas>
+		</Properties>
+	</FS_ENTITY_DATA>
+
+	<FS_FRAME_DATA>	FIXED_DICT
+		<implementedBy>FS_FRAME_DATA.inst</implementedBy>
+		<Properties>
+			<frameid>
+				<Type>	FRAMEID	</Type>
+			</frameid>
+			<operation>
+				<Type>	ARRAY <of> FS_ENTITY_DATA </of> </Type>
+			</operation>
+		</Properties>
+	</FS_FRAME_DATA>
+
+	<FS_FRAME_LIST>	FIXED_DICT
+		<implementedBy>FS_FRAME_LIST.inst</implementedBy>
+		<Properties>
+			<values>
+				<Type>	ARRAY <of> FS_FRAME_DATA </of>	</Type>
+			</values>
+		</Properties>
+	</FS_FRAME_LIST>
+</root>

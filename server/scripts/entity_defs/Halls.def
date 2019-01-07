@@ -1,0 +1,47 @@
+<root>
+	<Components>
+		<componentMatcher>
+			<Type>			Matcher		</Type>
+			<Persistent>	true		</Persistent>
+		</componentMatcher>
+	</Components>
+
+	<Properties>
+	</Properties>
+
+	<ClientMethods>
+	</ClientMethods>
+
+	<BaseMethods>
+		<startGame>
+			<Arg>		ENTITYCALL		</Arg>
+			<Arg>		UNICODE			</Arg>
+			<Arg>		PY_DICT			</Arg>
+		</startGame>
+
+		<leaveGame>
+			<Arg>		ENTITYCALL		</Arg>
+			<Arg>		MATCH_ID		</Arg>
+		</leaveGame>
+
+		<acquireAllPlayersMatchData>
+			<Arg>		MATCH_ID		</Arg>
+		</acquireAllPlayersMatchData>
+
+		<acquireOnePlayerMatchData>
+			<Arg>		MATCH_ID		</Arg>
+			<Arg>		ENTITYCALL		</Arg>
+		</acquireOnePlayerMatchData>
+
+		<matchDataChanged>
+			<Arg>		MATCH_ID		</Arg>
+			<Arg>		ENTITYCALL		</Arg>
+			<Arg>		PY_DICT			</Arg>
+		</matchDataChanged>
+
+	</BaseMethods>
+
+	<CellMethods>
+	</CellMethods>
+
+</root>
