@@ -105,9 +105,9 @@ class CSV_Helper:
         :param fileName: csv 文件名
         :return: 有返回一个 table,没有返回 None
         '''
-        reader = csv.reader(open("D:/work/kbengine/kbengine/kbengine_moba_assets/scripts/data/"+fileName, mode="r+", encoding='UTF-8'))
+       # reader = csv.reader(open("D:/work/kbengine/kbengine/kbengine_moba_assets/scripts/data/"+fileName, mode="r+", encoding='UTF-8'))
 
-        # reader = csv.reader(KBEngine.open("data/"+fileName,"r+"))
+        reader = csv.reader(KBEngine.open("data/"+fileName,"r+",'UTF-8'))
 
         table = [line for line in reader]
 
