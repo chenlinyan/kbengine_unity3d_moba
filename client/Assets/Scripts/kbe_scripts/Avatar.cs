@@ -12,7 +12,7 @@ namespace KBEngine
         public Dictionary<Int32, MATCHING_INFOS> matchInfosDict = new Dictionary<Int32, MATCHING_INFOS>();
         public Avatar()
         {
-            
+            KBEngine.Event.registerOut("onKicked", this, "onKicked");
         }
 
         public override void __init__()
@@ -20,16 +20,20 @@ namespace KBEngine
             // 触发登陆成功事件
             Event.fireOut("onLoginSuccessfully", new object[] { KBEngineApp.app.entity_uuid, id, this });
 
-            KBEngine.Event.registerIn("reqReady", this, "startGame");
+            KBEngine.Event.registerIn("reqJoinGame", this, "reqJoinGame");
+            KBEngine.Event.registerIn("reqExitGame", this, "reqExitGame");
             KBEngine.Event.registerIn("reqHeroInfoByHeroId", this, "reqHeroInfoByHeroId");
-            KBEngine.Event.registerIn("reqSkillLst", this, "reqSkillLst");
-            KBEngine.Event.registerIn("reqExitMatch", this, "reqExitMatch");
+            //KBEngine.Event.registerIn("reqSkillLst", this, "reqSkillLst");
 
         }
 
-        public void startGame(Byte ready)
+        public void reqJoinGame(Byte ready)
         {
-            baseEntityCall.startGame();
+            baseEntityCall.reqJoinGame();
+        }
+        public void reqExitGame()
+        {
+            baseEntityCall.reqExitGame();
         }
 
         public void reqHeroInfoByHeroId(int heroId)
@@ -37,16 +41,24 @@ namespace KBEngine
             baseEntityCall.reqHeroInfosByHeroId(heroId);
         }
 
-        public void reqSkillLst()
-        {
-            baseEntityCall.reqSkillLst();
-        }
+        //public void reqSkillLst()
+        //{
+        //    baseEntityCall.reqSkillLst();
+        //}
 
-        public void reqExitMatch()
-        {
-            baseEntityCall.reqExitMatch();
-        }
+      
         public override void onDestroy()
+        {
+
+        }
+        public override void onJoinGameResult(Byte flag)
+        {
+            if (flag > 0)
+            {
+                onGameStateChanged(4);
+            }
+        }
+        public override void onExitGameResult(Byte flag)
         {
 
         }
@@ -79,10 +91,6 @@ namespace KBEngine
                 matchInfosDict[info.id] = info;
             }
             Debug.Log("matchInfosDict::::count" + matchInfosDict.Count + ",infos::::count:::" + infos.values.Count);
-            if (matchInfosDict.Count > 0)
-            {
-                Event.fireOut("onChangeLoadScene", new object[] {1});
-            }
         }
 
         public override void onPushAvatarCurrentScene(UInt32 arg1)
@@ -101,14 +109,14 @@ namespace KBEngine
             }
         }
 
-        public override void onReqsSkillLstResult(SKILL_INFOS_LIST skillLst)
-        {
-            Debug.Log("onReqsSkillLstResult::" + skillLst.Count);
-            for (int i = 0; i < skillLst.Count; i++)
-            {
-                Debug.Log("skillId[" + skillLst[i].id + "]" + ",name::" + skillLst[i].name + ",other::" + skillLst[i].skill_ap_growth);
-            }
-        }
+        //public override void onReqsSkillLstResult(SKILL_INFOS_LIST skillLst)
+        //{
+        //    Debug.Log("onReqsSkillLstResult::" + skillLst.Count);
+        //    for (int i = 0; i < skillLst.Count; i++)
+        //    {
+        //        Debug.Log("skillId[" + skillLst[i].id + "]" + ",name::" + skillLst[i].name + ",other::" + skillLst[i].skill_ap_growth);
+        //    }
+        //}
 
         public override void onNameChanged(string old)
         {
@@ -116,17 +124,6 @@ namespace KBEngine
             Event.fireOut("set_name", new object[] { this, this.name });
         }
 
-        //public override void onTeamIDChanged(SByte old)
-        //{
-        //    Debug.Log(className + "::set_name: " + old + " => " + teamID);
-        //    Event.fireOut("set_teamID", new object[] { this, this.teamID });
-        //}
-        //public override void onGameStateCChanged(SByte oldValue)
-        //{
-        //    //游戏状态::  登录1, 大厅中2, 等待匹配3, 匹配中4, 匹配结束5, 
-        //    //选择英雄6, 准备进入游戏7, 开始游戏8, 游戏中9, 游戏結束10, 统计结果11
-        //    Event.fireOut("onGameStateChanged", new object[] {this.gameStateC}); 
-        //}
 
         public override void onReadyBattle()
         {
@@ -168,5 +165,32 @@ namespace KBEngine
 
             }
         }
+
+        /// <summary>
+        /// 异地登录处理后推送的信息
+        /// </summary>
+        /// <param name="infos"></param>
+        /// <param name="heroInfos"></param>
+        /// <param name="skillLst"></param>
+        /// <param name="gameState"></param>
+        public override void onNonLocalLogin(MATCHING_INFOS_LIST infos, HERO_INFOS heroInfos, SKILL_INFOS_LIST skillLst, Int32 gameState)
+        {
+            onPushMatchPlayersData(infos);
+            onReqsChooseHeroResult(heroInfos,skillLst);
+            onGameStateChanged(gameState);
+            Debug.Log("gameState" + gameState);
+        }
+
+        public override void onGameStateChanged(Int32 gameState)
+        {
+            Event.fireOut("onGameStateChanged", new object[] { gameState });
+        }
+        //当前客户端被踢掉操作
+        public void onKicked(UInt16 failedcode)
+        { 
+            //释放所有数据等等
+            matchInfosDict.Clear();
+        }
+
     }
 }

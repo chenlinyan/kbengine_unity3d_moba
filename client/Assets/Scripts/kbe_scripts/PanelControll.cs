@@ -46,12 +46,13 @@ public class PanelControll : MonoBehaviour {
         KBEngine.Event.registerOut("readyResult", this, "readyResult");
 
         KBEngine.Event.registerOut("onGameStateChanged", this, "onGameStateChanged");
-        KBEngine.Event.registerOut("onChangeLoadScene", this, "onChangeLoadScene");
         KBEngine.Event.registerOut("onPlayerHeroIdChanged", this, "onPlayerHeroIdChanged");
 
         KBEngine.Event.registerOut("onReadyBattle", this, "onReadyBattle");
         KBEngine.Event.registerOut("onLoadingToReadyBattleState", this, "onLoadingToReadyBattleState");
         KBEngine.Event.registerOut("onExitMatchMsg", this, "onExitMatchMsg");
+
+        KBEngine.Event.registerOut("onKicked", this, "onKicked");
 
     }
 
@@ -59,6 +60,17 @@ public class PanelControll : MonoBehaviour {
     {
         KBEngine.Event.deregisterOut(this);
     }
+
+    //当前客户端被踢掉操作
+    public void onKicked(UInt16 failedcode)
+    {
+        SceneManager.LoadScene("start");
+        ActivePanel(PanelType.Login);
+       //释放所有数据等等
+        KBEngine.KBEngineApp.app.reset();
+        Debug.LogError("onKicked_onKicked_onKicked::" + failedcode.ToString());
+    }
+
 
 
     private void ShowTips(Vector2 postion, string tip)
@@ -91,7 +103,7 @@ public class PanelControll : MonoBehaviour {
     public void OnStarClick()
     {
         if (!loadFlag)
-            KBEngine.Event.fireIn("reqReady", (Byte)1);
+            KBEngine.Event.fireIn("reqJoinGame", (Byte)1);
 
     }
 
@@ -108,8 +120,8 @@ public class PanelControll : MonoBehaviour {
     {
         if (!loadFlag)
         {
-            KBEngine.Event.fireIn("reqExitMatch");
-            Debug.Log("reqExitMatchreqExitMatchreqExitMatchreqExitMatch");
+            KBEngine.Event.fireIn("reqExitGame");
+            Debug.Log("reqExitGamereqExitGamereqExitGamereqExitGame");
         }
 
     }
@@ -144,32 +156,22 @@ public class PanelControll : MonoBehaviour {
         ActivePanel(PanelType.Room);
     }
 
-    public void onGameStateChanged(SByte gameState)
+    public void onGameStateChanged(Int32 gameState)
     {
-        //游戏状态::  登录1, 大厅中2, 等待匹配3, 匹配中4, 匹配结束5, 
-        //选择英雄6, 准备进入游戏7, 开始游戏8, 游戏中9, 游戏結束10, 统计结果11
-        if (gameState == 6) //选择英雄
+        //登录1, 大厅中2, 匹配中3, 选择英雄4, 匹配结束5, 进入游戏前等待6, 准备开始游戏7, 开始游戏8, 游戏中9, 游戏結束10, 统计结果11
+        if (gameState == 3 || gameState == 4)
         {
             ActivePanel(PanelType.Match);
         }
-        else if (gameState == 7)// 准备进入游戏
+        else if (gameState > 4 && gameState < 9)
         {
-
+            ActivePanel(PanelType.Room);
+            loadFlag = true; //loadFlag表示加载过程，其中所有的按钮都不能操作
         }
-        else if (gameState == 8)//开始游戏
+        else if (gameState == 9)
         {
             SceneManager.LoadScene("Battlefield");
         }
-    }
-
-    public void onChangeLoadScene(int gameState)
-    {
-        //选择英雄1, 准备进入游戏2, 开始游戏3, 游戏中4, 游戏結束5, 统计结果5
-        if (gameState == 1)
-        {
-            ActivePanel(PanelType.Match);
-        }
-         
     }
 
     /// <summary>
