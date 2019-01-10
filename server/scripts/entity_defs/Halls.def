@@ -13,16 +13,15 @@
 	</ClientMethods>
 
 	<BaseMethods>
-		<startGame>
+		<joinMatch>
 			<Arg>		ENTITYCALL		</Arg>
-			<Arg>		UNICODE			</Arg>
 			<Arg>		PY_DICT			</Arg>
-		</startGame>
+		</joinMatch>
 
-		<leaveGame>
-			<Arg>		ENTITYCALL		</Arg>
+		<exitMatch>
+			<Arg>		ENTITY_ID		</Arg>
 			<Arg>		MATCH_ID		</Arg>
-		</leaveGame>
+		</exitMatch>
 
 		<acquireAllPlayersMatchData>
 			<Arg>		MATCH_ID		</Arg>
@@ -30,7 +29,7 @@
 
 		<acquireOnePlayerMatchData>
 			<Arg>		MATCH_ID		</Arg>
-			<Arg>		ENTITYCALL		</Arg>
+			<Arg>		ENTITY_ID		</Arg>
 		</acquireOnePlayerMatchData>
 
 		<matchDataChanged>

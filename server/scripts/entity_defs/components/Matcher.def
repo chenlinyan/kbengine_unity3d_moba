@@ -12,10 +12,10 @@
 			<Type>				MATCHTIME			</Type>
 			<Flags>				BASE				</Flags>
 		</matchTime>
-		<loadTimeToOpenRoom>
+		<befCreRoomLoadTime>
 			<Type>				INT32				</Type>
 			<Flags>				BASE				</Flags>
-		</loadTimeToOpenRoom>
+		</befCreRoomLoadTime>
 	</Properties>
 
 	<BaseMethods>

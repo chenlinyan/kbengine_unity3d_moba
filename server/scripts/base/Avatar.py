@@ -12,6 +12,7 @@ from CSV_Helper import *
 
 TIMER_TYPE_DESTROY = 1
 TIMER_TYPE_LEAVEROOM = 2
+TIMER_TYPE_ADJUST_FRAMEID = 3
 
 class Avatar(KBEngine.Proxy):
 	def __init__(self):
@@ -20,13 +21,16 @@ class Avatar(KBEngine.Proxy):
 		self.cellData["dbid"] = self.databaseID
 
 		# 随机一个角色模型
-		self.cellData["modelID" ] = random.randint(0,1)
+		self.cellData["modelID"] = random.randint(0, 1)
 
 		#获取账户名称
-		self.cellData["name"]     = self.__ACCOUNT_NAME__
-		self.cellData["teamId"]   = 0
-		self.cellData["heroId"]   = 0
+		self.cellData["name"]      = self.__ACCOUNT_NAME__
+		self.cellData["teamId"]    = 0
+		self.cellData["heroId"]    = 0
 		self.cellData["heroIdLst"] = [10001, 10002]
+
+		self.heroId = 0
+		self.disconnectFlag = False
 
 		#获取cvs的配置数据对象
 		self.conf = CSV_Helper()
@@ -35,13 +39,13 @@ class Avatar(KBEngine.Proxy):
 		self.gameState = GameConstants.GAMESTATE_LOGIN
 
 		self._destroyTimer = 0
-		DEBUG_MSG("avatar::__init__ [%d][%s] " % (self.id, MatchAvatarReport.eventNamePushMatchDatas))
+		self._adjustFrameIdTimer = 0
 
 
-		self.registerEvent(MatchAvatarReport.eventNamePushMatchDatas,	 self.onRecvMatchPlayersData)
-		self.registerEvent(MatchAvatarReport.eventNameMatchStateChanged,	 self.onMatchStateChanged)
-		self.registerEvent(MatchAvatarReport.eventNamePushMatchDataChanged,	 self.onRecvPlayerMatchDataChanged)
-		self.registerEvent(MatchAvatarReport.eventNamePushExitMatchState,	 self.onRecvExitMatchState)
+		self.registerEvent(MatchAvatarReport.eventNameJoinMatch,	 	 self.onRecvPlayersJoinMatch)
+		self.registerEvent(MatchAvatarReport.eventNameMatchStateChanged, self.onRecvPlayerMatchStateChanged)
+		self.registerEvent(MatchAvatarReport.eventNameMatchDataChanged,	 self.onRecvPlayerMatchDataChanged)
+		self.registerEvent(MatchAvatarReport.eventNameExitMatch,	 	 self.onRecvPlayerExitMatch)
 
 
 	def destroySelf(self):
@@ -58,6 +62,7 @@ class Avatar(KBEngine.Proxy):
 		# 销毁base
 		self.destroy()
 		self._destroyTimer = 0
+		self._adjustFrameIdTimer = 0
 
 	def onTimer(self, id, userArg):
 		"""
@@ -69,6 +74,15 @@ class Avatar(KBEngine.Proxy):
 		if TIMER_TYPE_DESTROY == userArg:
 			self.onDestroyTimer()
 
+		if TIMER_TYPE_ADJUST_FRAMEID == userArg:
+			#异地重登后,玩家重新调整逻辑帧数
+			####修改帧数的功能暂时屏蔽带掉
+			if self.cell:
+				self.cell.adjustFrameId(0)
+				self.delTimer(id)
+				self._adjustFrameIdTimer = 0
+				DEBUG_MSG("TIMER_TYPE_ADJUST_FRAMEID_____self.cell.adjustFrameId is 0")
+
 	def onClientEnabled(self):
 		"""
 		KBEngine method.
@@ -77,13 +91,19 @@ class Avatar(KBEngine.Proxy):
 		"""
 		INFO_MSG("Avatar[%i] entities enable. EntityCall:%s" % (self.id, self.client))
 
+		# 如果异地重登调整帧数的计时器已经开启了，而玩家再次上线了,那么应该取消计时器
+		if self._adjustFrameIdTimer > 0:
+			self.delTimer(self._adjustFrameIdTimer)
+			self._adjustFrameIdTimer = 0
+
 		# 如果销毁玩家计时器已经开启了，此处玩家又上线了那么应该取消计时器
 		if self._destroyTimer > 0:
 			self.delTimer(self._destroyTimer)
 			self._destroyTimer = 0
+			self.disconnectFlag = False
 
 		#防止异地登录或者重连，将数据主动推送给客户端
-		self.pushAvatarCurrentScene()
+		self.dealClientEnabled()
 		# 如果玩家存在cell， 说明已经在地图中了， 因此不需要再次进入地图
 		#if self.cell is None:
 			# 玩家上线了或者重登陆了， 此处告诉大厅，玩家请求登陆到游戏地图中
@@ -99,7 +119,9 @@ class Avatar(KBEngine.Proxy):
 		# 防止正在请求创建cell的同时客户端断开了， 我们延时一段时间来执行销毁cell直到销毁base
 		# 这段时间内客户端短连接登录则会激活entity
 		# 延时GAME_ROUND_TIME秒的原因是， 我们确保玩家掉线后， 他的服务端实体能够完整参与一场游戏
-		self._destroyTimer = self.addTimer(GameConfigs.GAME_ROUND_TIME + 15, 0, TIMER_TYPE_DESTROY)
+		#self._destroyTimer = self.addTimer(GameConfigs.GAME_ROUND_TIME + 15, 0, TIMER_TYPE_DESTROY)
+
+		self.dealDisconnect()
 
 	def onLogOnAttempt(self, ip, port, password):
 		"""
@@ -107,14 +129,13 @@ class Avatar(KBEngine.Proxy):
 		客户端登陆失败时会回调到这里
 		"""
 
-		#客户端还在，表明是异地登录
-		if self.client is not None:
-			self.dealNonLocalLogin()
-			pass
-		#表示客户端断线重连
-		else:
-			self.dealDisconnect()
-			pass
+		# if self.client is not None:
+		# 	#客户端还在，表明是异地登录
+		# 	pass
+		# 	# self.dealNonLocalLogin()
+		# else:
+		# 	#表示客户端断线重连
+		# 	self.dealDisconnect()
 
 		INFO_MSG(ip, port, password)
 		return KBEngine.LOG_ON_ACCEPT
@@ -127,8 +148,8 @@ class Avatar(KBEngine.Proxy):
 		"""
 
 		#将自身需要的数据都加载到对应的room部分上
-		roomBaseEntity = self.componentMatcherAvatar.roomBaseEntity
-		roomBaseEntity.enterRoom(self)
+		# roomBaseEntity = self.componentMatcherAvatar.roomBaseEntity
+		# roomBaseEntity.enterRoom(self)
 
 		#当前游戏状态为:游戏中
 		self.gameState = GameConstants.GAMESTATE_PLAYING
@@ -168,30 +189,48 @@ class Avatar(KBEngine.Proxy):
 		DEBUG_MSG("Avatar::onDestroyTimer: %i" % (self.id))
 		self.destroySelf()
 
-	def startGame(self):
+	def reqJoinGame(self):
 		"""
-		开始游戏，即开始匹配
+		加入游戏
 		"""
-		DEBUG_MSG("Avatar_startGame:::[%s][%i]" %(self.cellData["name"], self.id))
+		DEBUG_MSG("Avatar_joinGame:::[%s][%i]" %(self.cellData["name"], self.id))
+		resultId = self.joinMatch()
+		if self.client:
+			self.client.onJoinGameResult(resultId)
 
+	def reqExitGame(self):
+		"""
+			退出游戏
+		"""
+		resultId = self.exitMatch()
+		if self.client:
+			self.client.onExitGameResult(resultId)
+
+	def joinMatch(self):
+		"""
+			加入匹配
+		"""
 		self.gameState = GameConstants.GAMESTATE_MATCHING
-		self.cellData["gameStateC"] = GameConstants.GAMESTATE_MATCHING
-
-		#玩家游戏
 		playerData = {"entityCall":self, "id":self.id, "name":self.cellData["name"], "teamId": 0, "heroId": 0, "heroIdLst":self.cellData["heroIdLst"] }
-		self.matchId   = KBEngine.globalData["Halls"].startGame(self, "componentMatcherAvatar", playerData)
+		self.matchId  = KBEngine.globalData["Halls"].joinMatch(self, playerData)
 
-		pass
+		if self.matchId == -1:
+			#返回-1,表明匹配失败
+			self.gameState = GameConstants.GAMESTATE_HALL
+			return False
+		return True
 
-	def leaveGame(self):
-		# if(not KBEngine.globalData["Halls"].ifExitHalls(self.id)):
-		# 	return
-		self.cellData["heroId"] = ""
-		self.cellData["teamId"] = 0
-		self.gameState = GameConstants.GAMESTATE_MATCHING
-		KBEngine.globalData["Halls"].leaveGame(self, self.matchId)
-
-		pass
+	def exitMatch(self):
+		"""
+			退出匹配
+		"""
+		if KBEngine.globalData["Halls"].exitMatch(self.id, self.matchId):
+			self.cellData["heroId"] = 0
+			self.cellData["teamId"] = 0
+			self.heroId = 0
+			self.gameState = GameConstants.GAMESTATE_HALL
+			return True
+		return False
 
 	def returnHalls(self):
 		pass
@@ -199,33 +238,35 @@ class Avatar(KBEngine.Proxy):
 	def gameOver(self):
 		pass
 
-	def onRecvMatchPlayersData(self, playersData):
+	def onRecvPlayersJoinMatch(self, playersData, state):
 		'''
 			接收玩家匹配信息的推送
 		'''
-		DEBUG_MSG("Avatar_base_reciverMatchPlayersData_entityCall[%i], playersData.len[%i],\
+		DEBUG_MSG("Avatar_base_onRecvPlayersJoinMatch_entityCall[%i], playersData.len[%i],\
 			str(playerData)[%s]" % (self.id, len(playersData), str(playersData)))
-
+		tmpState = self.gameState
 		matchInfoLst = TMatchingInfosList()
-		for playerEntityCall in playersData.keys():
-			matchInfo 	 = TMatchingInfos()
-			matchInfoLst[playerEntityCall.id] = matchInfo.createFromDict(playersData[playerEntityCall])
-			if playerEntityCall.id ==  self.id:
+		for playerEntityId in playersData.keys():
+			matchInfo = TMatchingInfos()
+			matchInfoLst[playerEntityId] = matchInfo.createFromDict(playersData[playerEntityId])
+			if playerEntityId == self.id:
+				#转换匹配状态为当前的游戏状态
+				tmpState = self.transformMatchStateToGameState(state)
+
 				#在这里将分配好给玩家的team数值给赋值上
-				teamId = playersData[playerEntityCall]["teamId"]
+				teamId = playersData[playerEntityId]["teamId"]
 				if self.cell is None:
 					self.cellData["teamId"]  = teamId
-				else:
-					self.cell.setTeamId(teamId)
 				DEBUG_MSG("onRecvMatchPlayersData_self.teamId::[%i],avatar[%s]" % (teamId, self.cellData["name"]))
+
 		self.client.onPushMatchPlayersData(matchInfoLst)
 
-	def onMatchStateChanged(self, matchState):
-		if matchState == 2:
-			self.gameState = GameConstants.GAMESTATE_SELECT_HERO
-			self.cellData["gameStateC"] = matchState
-
-		if matchState == 3:
+	def onRecvPlayerMatchStateChanged(self, matchState):
+		"""
+			当前匹配对象状态发生改变，推送当前匹配对象状态
+		"""
+		self.gameState = self.transformMatchStateToGameState(matchState)
+		if self.gameState == GameConstants.GAMESTATE_LOAD_TO_GAME:
 			#表示匹配成功后等待加载房间时段::ID_LOADING_TIME
 			if self.client:
 				self.client.onLoadingToReadyBattleState()
@@ -241,8 +282,8 @@ class Avatar(KBEngine.Proxy):
 		if playerData.__contains__("heroId") and self.client:
 			self.client.onHeroIdChanged(entityId, playerData["heroId"])
 
-	def onRecvExitMatchState(self, entityId):
-		DEBUG_MSG("onRecvExitMatchState::entityId[%i]" % entityId)
+	def onRecvPlayerExitMatch(self, entityId):
+		DEBUG_MSG("onRecvPlayerExitMatch::entityId[%i]" % entityId)
 		if self.client:
 			self.client.onExitMatch(entityId)
 		pass
@@ -273,49 +314,41 @@ class Avatar(KBEngine.Proxy):
 		if self.cellData["heroId"] == heroId:
 			return
 
-		self.cellData["heroId"]  = heroId
+		self.heroId = heroId
+		self.cellData["heroId"] = heroId
 
 		#返回当前的英雄信息
-		if self.client:
-			self.client.onReqsChooseHeroResult(self.getHeroInfo(heroId), self.getSkillList())
+		if self.client and self.cell is None:
+			self.cellData["heroInfo"] = self.getHeroInfo(heroId)
+			self.cellData["skillInfosLst"] = self.getSkillList(self.cellData["heroInfo"])
+			self.client.onReqsChooseHeroResult(self.cellData["heroInfo"], self.cellData["skillInfosLst"])
 
 		#需要向当前的玩家所在的匹配池中修改数据
 		self.matchDataChanged(self, {"heroId":heroId})
 
-		pass
-
-	def reqSkillLst(self):
-		#返回当前的英雄的技能列表
-		if self.client:
-			self.client.onReqsSkillLstResult(self.getSkillList())
-		return
-
-	def reqExitMatch(self):
-		'''
-			请求退出匹配
-		'''
-		self.leaveGame()
-		pass
+	# def reqSkillLst(self):
+	# 	#返回当前的英雄的技能列表
+	# 	if self.client:
+	# 		self.client.onReqsSkillLstResult(self.getSkillList())
+	# 	return
 
 	def getHeroInfo(self, heroId):
-		self.cellData["heroInfos"] = self.conf.getTable('d_hero.csv').get(heroId, None)
-		return self.cellData["heroInfos"]
+		return self.conf.getTable('d_hero.csv').get(heroId, None)
 
-	def getSkillList(self):
-		if self.cell:
-			return
-		if self.cellData["heroInfos"] is None:
-			DEBUG_MSG("Avatar_cell_getSkillIdList:: self.heroInfos is None!!!")
-			return
+	def getSkillList(self, heroInfos):
+		if self.cell or heroInfos is None:
+			DEBUG_MSG("Avatar_base_getSkillIdList:: heroInfos is None!!!")
+			return []
+
 		skillIdList = []
-		skillIdList.append(self.cellData["heroInfos"]["skill_1"])
-		skillIdList.append(self.cellData["heroInfos"]["skill_2"])
-		skillIdList.append(self.cellData["heroInfos"]["skill_3"])
-		skillIdList.append(self.cellData["heroInfos"]["skill_4"])
+		skillIdList.append(heroInfos["skill_1"])
+		skillIdList.append(heroInfos["skill_2"])
+		skillIdList.append(heroInfos["skill_3"])
+		skillIdList.append(heroInfos["skill_4"])
 
 		if len(skillIdList) <= 0:
-			DEBUG_MSG("Avatar_cell_getSkillIdList:: skillIdList len <= 0!!!")
-			return
+			DEBUG_MSG("Avatar_base_getSkillIdList:: skillIdList len <= 0!!!")
+			return []
 
 		skillList = []
 		tableInfos = self.conf.getTable('d_skill.csv')
@@ -329,35 +362,95 @@ class Avatar(KBEngine.Proxy):
 		'''
 			处理异地登录
 		'''
-		if 	self.gameState == GameConstants.GAMESTATE_MATCH_END:
+		#推送当前匹配池中的所有的玩家匹配数据、当前玩家选择的英雄的相关信息和技能、self.gameState
+		playersData = self.acquireAllPlayersMatchData()
+		matchInfoLst = TMatchingInfosList()
+		for playerEntityId in playersData.keys():
+			matchInfo = TMatchingInfos()
+			matchInfoLst[playerEntityId] = matchInfo.createFromDict(playersData[playerEntityId])
+		DEBUG_MSG("Avatar_dealNonLocalLogin_playersData::::[%s][%i]" % (str(playersData), self.gameState))
 
-			pass
-		pass
+		if self.cell is None:
+			heroInfo = self.cellData["heroInfo"]
+			skillInfosLst = self.cellData["skillInfosLst"]
+		else:
+			heroInfo = self.getHeroInfo(self.heroId)
+			skillInfosLst = self.getSkillList(heroInfo)
+		if self.client:
+			self.client.onNonLocalLogin(matchInfoLst, heroInfo, skillInfosLst, self.gameState)
+
+		#玩家需要将帧数从0开始重新推送给客户端,为了确保玩家调整到battle界面并准备好,倒计数1秒后再调整帧数
+		self.setAdjustFrameIdTimer()
 
 	def dealDisconnect(self):
 		'''
-			#处理断线重登==>情况：断线情况包括主动关闭客户端、客户端断线未在规定时间内登录
+			#处理断线重连==>情况：断线情况包括主动关闭客户端、客户端断线未在规定时间内登录
 		'''
-		pass
+		if self.gameState < GameConstants.GAMESTATE_MATCH_END:
+			if self.gameState >= GameConstants.GAMESTATE_MATCHING:
+				self.reqExitGame()
+			self._destroyTimer = self.addTimer(GAME_EXTEND_DESTORY_TIME, 0, TIMER_TYPE_DESTROY)
+		self.disconnectFlag = True
 
-	def pushAvatarCurrentScene(self):
+	def dealReconnection(self):
+		self.disconnectFlag = False
+
+		if self.gameState < GameConstants.GAMESTATE_PLAYING and self.cell:
+			#表示游戏断线时处于游戏还未开始状态, 但重连时服务器已进入游戏中
+			self.gameState = GameConstants.GAMESTATE_PLAYING
+			self.client.onGameStateChanged(self.gameState)
+
+			self.setAdjustFrameIdTimer()
+		elif self.gameState == GameConstants.GAMESTATE_PLAYING:
+			#表示游戏断线时处于游戏进行状态
+			#通过客户端推上来的帧数,把当前帧数改为实际渲染帧数
+			###待处理
+			pass
+
+	def dealClientEnabled(self):
 		'''
 			如果当前玩家状态不处于登录状态，即需要推送当前状态给玩家
 		'''
 		if self.gameState != GameConstants.GAMESTATE_LOGIN:
-			if self.client is not None:
-				self.client.onPushAvatarCurrentScene(self.gameState)
-			pass
+			if self.disconnectFlag:
+				#处理断线重连
+				self.dealReconnection()
+			else:
+				#处理异地登录
+				self.dealNonLocalLogin()
 		else:
 			#客户端登录成功后会直接跳转到大厅
 			self.gameState = GameConstants.GAMESTATE_HALL
 		pass
 
+	def transformMatchStateToGameState(self, matchState):
+		#当前匹配对象中的匹配状态
+		# ID_MATCH_BEGIN = 0
+		# ID_MATCHING    = 1
+		# ID_MATCH_CREROOMRULE   = 2
+		# ID_MATCH_END   = 3
+		# ID_LOADING_TIME   = 4
+		# ID_ROOM_CREATION_BEGIN       = 5
+		# ID_ROOM_CREATION_COMPLETE    = 6
+		state = GameConstants.GAMESTATE_HALL
+		if matchState == 1:
+			state = GameConstants.GAMESTATE_MATCHING
+		elif matchState == 2:
+			state = GameConstants.GAMESTATE_SELECT_HERO
+		elif matchState == 3:
+			state = GameConstants.GAMESTATE_MATCH_END
+		elif matchState == 4:
+			#表示匹配成功后等待加载房间时段::ID_LOADING_TIME
+			state = GameConstants.GAMESTATE_LOAD_TO_GAME
+		elif matchState == 5:
+			state = GameConstants.GAMESTATE_READY_GAME
+		elif matchState == 6:
+			state = GameConstants.GAMESTATE_PLAYING
+		return state
 
-	# def registerHalls(self):
-	# 	DEBUG_MSG("Avatar_register::Halls self.cellData[name]:%s " %(self.cellData["name"]))
-	# 	KBEngine.globalData["Halls"].registerHalls(self, self.cellData["name"])
-	# 	self.gameState = GameConstants.GAMESTATE_HALL
-
-	# def deregisterHalls(self):
-	# 	KBEngine.globalData["Halls"].deregisterHalls(self.id)
+	def setAdjustFrameIdTimer(self):
+		#玩家需要将帧数从0开始重新推送给客户端,为了确保玩家调整到battle界面并准备好,倒计数1秒后再调整帧数
+		if self._adjustFrameIdTimer != 0:
+			self.delTimer(self._adjustFrameIdTimer)
+		if self.cell:
+			self._adjustFrameIdTimer = self.addTimer(1, 0, TIMER_TYPE_ADJUST_FRAMEID)

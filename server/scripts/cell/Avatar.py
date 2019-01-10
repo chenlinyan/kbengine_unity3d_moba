@@ -88,3 +88,11 @@ class Avatar(KBEngine.Entity):
 	def getGameState(self):
 		self.gameStateC = self.getCurrRoom().getGameState()
 		DEBUG_MSG("Avatar[%i] gameState changed::getGameState" % (self.id))
+
+	def adjustFrameId(self, frameId):
+		"""
+			调整逻辑帧数
+		"""
+		# if self.componentFrameSync:
+		# 	self.componentFrameSync.adjustFrameId(frameId)
+		pass

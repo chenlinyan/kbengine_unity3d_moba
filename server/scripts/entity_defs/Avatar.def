@@ -45,6 +45,11 @@
 			<Flags>				CELL_PUBLIC			</Flags>
 		</heroInfo>
 
+		<skillInfosLst>
+			<Type>				SKILL_INFOS_LIST	</Type>
+			<Flags>				CELL_PUBLIC			</Flags>
+		</skillInfosLst>
+
 		<dbid>
 			<Type>				DBID				</Type>
 			<Flags>				CELL_PUBLIC			</Flags>
@@ -96,30 +101,33 @@
 
 	<ClientMethods>
 		<onReqsChooseHeroResult>
-			<Arg>				HERO_INFOS			</Arg>
-			<Arg>				SKILL_INFOS_LIST	</Arg>
+			<Arg>			HERO_INFOS				</Arg>
+			<Arg>			SKILL_INFOS_LIST		</Arg>
 		</onReqsChooseHeroResult>
 
-		<onReqsSkillLstResult>
-			<Arg>				SKILL_INFOS_LIST	</Arg>
-		</onReqsSkillLstResult>
-
 		<onPushStatisticalResult>
-			<Arg>				TEAM_ID				</Arg>
+			<Arg>			TEAM_ID					</Arg>
 		</onPushStatisticalResult>
 
 		<onPushAvatarCurrentScene>
-			<Arg>				UINT32				</Arg>
+			<Arg>			UINT32					</Arg>
 		</onPushAvatarCurrentScene>
 
 		<onPushMatchPlayersData>
-			<Arg>		MATCHING_INFOS_LIST			</Arg>
+			<Arg>			MATCHING_INFOS_LIST		</Arg>
 		</onPushMatchPlayersData>
 
 		<onHeroIdChanged>
 			<Arg>			ENTITY_ID				</Arg>
 			<Arg>			HERO_ID					</Arg>
 		</onHeroIdChanged>
+
+		<onNonLocalLogin>
+			<Arg>			MATCHING_INFOS_LIST		</Arg>
+			<Arg>			HERO_INFOS				</Arg>
+			<Arg>			SKILL_INFOS_LIST		</Arg>
+			<Arg>			INT32					</Arg>
+		</onNonLocalLogin>
 
 		<onLoadingToReadyBattleState>
 		</onLoadingToReadyBattleState>
@@ -131,30 +139,34 @@
 			<Arg>			ENTITY_ID				</Arg>
 		</onExitMatch>
 
+		<onJoinGameResult>
+			<Arg>				BOOL				</Arg>
+		</onJoinGameResult>
+
+		<onExitGameResult>
+			<Arg>				BOOL				</Arg>
+		</onExitGameResult>
+
+		<onGameStateChanged>
+			<Arg>				INT32				</Arg>
+		</onGameStateChanged>
+
 	</ClientMethods>
 
 
 	<BaseMethods>
-		<startGame>
+		<reqJoinGame>
 			<Exposed/>
-		</startGame>
+		</reqJoinGame>
 
-		<leaveGame>
+		<reqExitGame>
 			<Exposed/>
-		</leaveGame>
+		</reqExitGame>
 
 		<reqHeroInfosByHeroId>
 			<Exposed/>
 			<Arg>				HERO_ID						</Arg>
 		</reqHeroInfosByHeroId>
-
-		<reqSkillLst>
-			<Exposed/>
-		</reqSkillLst>
-
-		<reqExitMatch>
-			<Exposed/>
-		</reqExitMatch>
 
 	</BaseMethods>
 
@@ -173,6 +185,10 @@
 			<Exposed/>
 			<Arg>				TEAM_ID						</Arg>
 		</submitStatisticalResult>
+
+		<adjustFrameId>
+			<Arg>				FRAMEID						</Arg>
+		</adjustFrameId>
 
 	</CellMethods>
 </root>

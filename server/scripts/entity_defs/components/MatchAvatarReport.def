@@ -23,18 +23,23 @@
 			<Arg>		SPACE_KEY					</Arg>
 		</createCell>
 
-		<pushMatchPlayersData>
+		<onJoinMatch>
 			<Arg>		PY_DICT						</Arg>
-		</pushMatchPlayersData>
+			<Arg>		INT32						</Arg>
+		</onJoinMatch>
 
-		<pushPlayerMatchDataChanged>
+		<onExitMatch>
+			<Arg>		ENTITY_ID						</Arg>
+		</onExitMatch>
+
+		<onMatchDataChanged>
 			<Arg>		ENTITY_ID						</Arg>
 			<Arg>		PY_DICT							</Arg>
-		</pushPlayerMatchDataChanged>
+		</onMatchDataChanged>
 
-		<pushExitMatchMsg>
-			<Arg>		ENTITY_ID						</Arg>
-		</pushExitMatchMsg>
+		<onMatchStateChaned>
+			<Arg>		INT32							</Arg>
+		</onMatchStateChaned>
 	</BaseMethods>
 
 	<CellMethods>

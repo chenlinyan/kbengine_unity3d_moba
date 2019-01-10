@@ -16,8 +16,7 @@ class Room(KBEngine.Space):
 	def __init__(self):
 		KBEngine.Entity.__init__(self)
 
-		self.cellData["roomKeyC"] = self.roomKey
-		self.avatars = {}
+		# self.cellData["roomKeyC"] = self.componentBaseMatcherRoom.roomKey
 		pass
 
 
@@ -30,12 +29,6 @@ class Room(KBEngine.Space):
 		pass
 
 	def enterRoom(self, entityCall):
-		self.avatars[entityCall.id] = entityCall
-		DEBUG_MSG("RoomBaseBase_enterRoom::_entityCall[%i]" %(entityCall.id))
-		# entityCall.createCell(self.cell, self.roomKey, teamId)
-		# self.cell.enterRoom(entityCall, teamId)
-		# self.avatars[entityCall.id] = entityCall
-		# print("enterRoom_enterRoom")
 		pass
 
 	def leaveRoom(self, entityId, teamId):

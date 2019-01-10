@@ -21,6 +21,16 @@
 	<MATCH_ID>			UINT32		</MATCH_ID>
 	<MATCHTIME>			INT32		</MATCHTIME>
 	<HERO_IDS_LIST> ARRAY <of> INT32 </of> </HERO_IDS_LIST>
+	<PLAYERS>	FIXED_DICT
+		<Properties>
+			<id>
+				<Type>	ENTITY_ID	</Type>
+			</id>
+			<entityCall>
+				<Type>	ENTITYCALL	</Type>
+			</entityCall>
+		</Properties>
+	</PLAYERS>
 
 	<HERO_INFOS>	FIXED_DICT
 		<Properties>

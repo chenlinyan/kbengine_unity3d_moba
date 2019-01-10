@@ -14,11 +14,11 @@ FIND_ROOM_NOT_FOUND = 0
 FIND_ROOM_CREATING = 1
 
 class TeamMatchRule(MatchRule):
-	def check(self, matcher, existPlayersData, playerData):
+	def check(self, matcher, allPlayersData, playerData):
 		teamACount = 0
 		teamBCount = 0
-		DEBUG_MSG("TeamMatchRule_check:: str(%s)" % str(existPlayersData))
-		for existPlayer in existPlayersData:
+		DEBUG_MSG("TeamMatchRule_check:: str(%s)" % str(allPlayersData))
+		for existPlayer in allPlayersData:
 			if existPlayer["teamId"] == GameConfigs.TEAM_A_ID:
 				teamACount = teamACount + 1
 			else:
@@ -49,9 +49,9 @@ class TeamMatchRule(MatchRule):
 
 
 class HeroChooseRule(CreateRoomRule):
-	def check(self, matcher, existPlayersData):
-		DEBUG_MSG("HeroChooseRule_check:: str(%s)" % str(existPlayersData))
-		for existPlayer in existPlayersData:
+	def check(self, matcher, allPlayersData):
+		DEBUG_MSG("HeroChooseRule_check:: str(%s)" % str(allPlayersData))
+		for existPlayer in allPlayersData:
 			if existPlayer["heroId"] == 0:
 				return False
 		return True
@@ -68,9 +68,6 @@ class Halls(KBEngine.Entity):
 
 		#進入大廳中所有的avatars
 		#self.avatars = {}
-
-		#大厅位置屬性
-		self.position = 0;
 
 		self.configMatherCondition()
 
@@ -108,9 +105,9 @@ class Halls(KBEngine.Entity):
 	# 	else:
 	# 		return False
 
-	def startGame(self, entityCall, cmptName, playerData):
+	def joinMatch(self, entityCall, playerData):
 		#if self.ifExitHalls(entityCall.id):
-		matchObjId = self.componentMatcher.joinMatch(entityCall, 0, cmptName, playerData)
+		matchObjId = self.componentMatcher.joinMatch(entityCall, 0, playerData)
 		if matchObjId < 0:
 			DEBUG_MSG("Halls_enterStartGame: avatar[%i] match failed!" % (entityCall.id))
 		#self.avatars[entityCall.id]["matchId"] = matchObjId
@@ -118,27 +115,30 @@ class Halls(KBEngine.Entity):
 		#	DEBUG_MSG("Halls_enterStartGame: avatar[%i] is no regist halls!" % (entityCall.id))
 		return matchObjId
 
-	def leaveGame(self, entityCall, matchId):
+	def exitMatch(self, entityId, matchId):
 		# avatarData = self.avatars[entityId]
 		# if not avatarData.__contains__("matchId"):
 		# 	return
 		# matchId    = avatarData["matchId"]
-		DEBUG_MSG("Halls_leaveGame_entityId[%i], matchObjId::[%i]" % (entityCall.id, matchId))
+		DEBUG_MSG("Halls_leaveGame_entityId[%i], matchObjId::[%i]" % (entityId, matchId))
 
 		if matchId < 0:
-			return
+			return False
 		else:
 			#如果该玩家所处的匹配池正处于匹配状态，那么该玩家是被允许退出匹配的
 			#若匹配池状态为已完成匹配，那是不允许退出的
-			if self.componentMatcher.leaveMatch(entityCall, matchId):
-				DEBUG_MSG("Halls_leaveGame_result[true]::[%i]" % entityCall.id)
+			if self.componentMatcher.exitMatch(entityId, matchId):
+				DEBUG_MSG("Halls_leaveGame_result[true]::[%i]" % entityId)
+				return True
+			else:
+				return False
 
 	def acquireAllPlayersMatchData(self, matchId):
 		return self.componentMatcher.acquireAllPlayersMatchData(matchId)
 		pass
 
-	def acquireOnePlayerMatchData(self, matchId, entityCall):
-		return self.componentMatcher.acquireOnePlayerMatchData(matchId, entityCall)
+	def acquireOnePlayerMatchData(self, matchId, entityId):
+		return self.componentMatcher.acquireOnePlayerMatchData(matchId, entityId)
 		pass
 
 	def matchDataChanged(self, matchId, entityCall, playerData):

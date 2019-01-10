@@ -2,10 +2,10 @@
 import KBEngine
 from KBEDebug import *
 
-eventNamePushMatchDatas 		= "onPushMatchPlayersData"
-eventNamePushMatchDataChanged	= "onPushPalyerMatchDataChanged"
+eventNameJoinMatch				= "onJoinMatch"
+eventNameExitMatch				= "onExitMatch"
+eventNameMatchDataChanged		= "onMatchDataChanged"
 eventNameMatchStateChanged		= "onMatchStateChanged"
-eventNamePushExitMatchState		= "onPushExitMatchState"
 
 class MatchAvatarReport(KBEngine.EntityComponent):
 
@@ -29,24 +29,24 @@ class MatchAvatarReport(KBEngine.EntityComponent):
 		DEBUG_MSG("createCell_createCell!!!")
 		pass
 
-	def pushMatchPlayersData(self, playersData):
+	def onJoinMatch(self, playersData, state):
 		#推送参与匹配的玩家的匹配信息
-		DEBUG_MSG("Avatar_base_matchComponent::pushMatchPlayersData_entityCall[%i], playersData.len[%i]" % (self.owner.id, len(playersData)))
-		self.owner.fireEvent(eventNamePushMatchDatas, playersData)
+		DEBUG_MSG("Avatar_base_matchComponent::onJoinMatch_entityCall[%i], playersData.len[%i]" % (self.owner.id, len(playersData)))
+		self.owner.fireEvent(eventNameJoinMatch, playersData, state)
 		pass
 
-	def pushPlayerMatchDataChanged(self, entityId, playerData):
+	def onMatchDataChanged(self, entityId, playerData):
 		#推送玩家主动去改变自身匹配数据的信息
-		DEBUG_MSG("Avatar_base_matchComponent::pushPlayerMatchDataChanged_entityCall[%i], playersData.len[%i]" % (self.owner.id, len(playerData)))
-		self.owner.fireEvent(eventNamePushMatchDataChanged, entityId, playerData)
+		DEBUG_MSG("Avatar_base_matchComponent::onMatchDataChanged_entityCall[%i], playersData.len[%i]" % (self.owner.id, len(playerData)))
+		self.owner.fireEvent(eventNameMatchDataChanged, entityId, playerData)
 		pass
 
-	def pushMatchState(self, matchState):
+	def onMatchStateChaned(self, matchState):
 		DEBUG_MSG("Avatar_base_matchComponent::pushMatchState_entityCall[%i],state[%i]" % (self.owner.id, matchState))
 		self.owner.fireEvent(eventNameMatchStateChanged, matchState)
 		pass
 
-	def pushExitMatchMsg(self, entityId):
-		DEBUG_MSG("Avatar_base_matchComponent::pushExitMatchMsg_entityCall[%i]" % (self.owner.id))
-		self.owner.fireEvent(eventNamePushExitMatchState, entityId)
+	def onExitMatch(self, entityId):
+		DEBUG_MSG("Avatar_base_matchComponent::onExitMatch_entityCall[%i]" % (self.owner.id))
+		self.owner.fireEvent(eventNameExitMatch, entityId)
 		pass

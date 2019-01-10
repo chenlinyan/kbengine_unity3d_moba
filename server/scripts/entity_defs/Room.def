@@ -5,29 +5,17 @@
 			<Type> 			FrameSync			</Type>
 			<Persistent>	true				</Persistent>
 		</componentFrameSync>
-		<componentMatcherRoom>
-			<Type> 			MatchRoomReport		</Type>
+		<cmptCellMatcherRoom>
+			<Type> 			MatchCellRoomReport		</Type>
 			<Persistent>	true				</Persistent>
-		</componentMatcherRoom>
+		</cmptCellMatcherRoom>
+		<cmptBaseMatcherRoom>
+			<Type> 			MatchBaseRoomReport		</Type>
+			<Persistent>	true				</Persistent>
+		</cmptBaseMatcherRoom>
 	</Components>
 
 	<Properties>
-		<roomKey>
-			<Type>			SPACE_KEY			</Type>
-			<Flags>			BASE				</Flags>
-			<Persistent>	true				</Persistent>
-		</roomKey>
-
-		<roomKeyC>
-			<Type>			SPACE_KEY			</Type>
-			<Flags>			CELL_PUBLIC			</Flags>
-		</roomKeyC>
-		<matchId>
-			<Type>			MATCH_ID			</Type>
-			<Flags>			CELL_PUBLIC				</Flags>
-			<Persistent>			true				</Persistent>
-		</matchId>
-
 	</Properties>
 
 	<ClientMethods>

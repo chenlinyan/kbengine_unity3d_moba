@@ -44,8 +44,6 @@ class Room(KBEngine.Space):
 		pass
 
 
-
-
 	def onTimer(self, id, userArg):
 		if TIMER_TYPE_DESTROY == userArg:
 			self.delTimer(id)
@@ -109,7 +107,7 @@ class Room(KBEngine.Space):
 		if len(self.teamA) <= 0 or len(self.teamB) <= 0 :
 			return
 
-		if  self.gameStateC == GameConstants.GAMESTATE_READY_GAME:
+		if self.gameStateC == GameConstants.GAMESTATE_READY_GAME:
 			for avatar in self.teamA.values():
 				avatar.client.onReadyBattle()
 			for avatar in self.teamB.values():
