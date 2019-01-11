@@ -5,14 +5,10 @@
 			<Type> 			FrameSync			</Type>
 			<Persistent>	true				</Persistent>
 		</componentFrameSync>
-		<cmptCellMatcherRoom>
-			<Type> 			MatchCellRoomReport		</Type>
+		<cmptMatcherRoom>
+			<Type> 			MatchRoomReport		</Type>
 			<Persistent>	true				</Persistent>
-		</cmptCellMatcherRoom>
-		<cmptBaseMatcherRoom>
-			<Type> 			MatchBaseRoomReport		</Type>
-			<Persistent>	true				</Persistent>
-		</cmptBaseMatcherRoom>
+		</cmptMatcherRoom>
 	</Components>
 
 	<Properties>

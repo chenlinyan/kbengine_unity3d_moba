@@ -39,7 +39,14 @@ class FrameSyncReport(KBEngine.EntityComponent):
 
 		self.getFrameSyncMgr().reportFrame(self.owner,framedata)
 
-		
+	# def adjustFrameId(self, frameId):
+	# 	"""
+	# 	调整逻辑帧的帧数
+	# 	"""
+	# 	if frameId > self.farmeID:
+	# 		return
+	# 	self.farmeID = frameId
+
 
 
 

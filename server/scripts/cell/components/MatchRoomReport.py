@@ -7,17 +7,13 @@ class MatchRoomReport(KBEngine.EntityComponent):
 		KBEngine.EntityComponent.__init__(self)
 
 	def onAttached(self, owner):
-		matchGlobalData  =  KBEngine.globalData["HallsMatcher"]
-		matchGlobalName  =  matchGlobalData["name"]
-		matchGlobalOwner =  matchGlobalData["owner"]
+		matchGlobalData = KBEngine.globalData["HallsMatcher"]
+		self.componentObj = KBEngine.globalData["HallsMatcher"].getComponent("Matcher")
 
-		DEBUG_MSG(" MatchRoomReport_MatchRoomReport::[%s] [%s] [%i]" % (matchGlobalName, self.owner, self.owner.matchId ))
-		self.componentObj = getattr(matchGlobalOwner, matchGlobalName)
-		DEBUG_MSG(" MatchRoomReport_MatchRoomReport_end::[%s] [%s]" % (matchGlobalName, type(self.componentObj)))
-		self.componentObj.onRoomGetCell(self.owner, self.owner.matchId, self.owner.spaceID)
+		self.componentObj.onRoomGetCell(self.owner, self.roomKeyC, self.owner.spaceID)
+
+		DEBUG_MSG("MatchRoomReport_cell_onAttached::onRoomGetCell_componentObj[%s]" % (type(self.componentObj)))
 
 	def onDetached(self, owner):
-		self.componentObj.onRoomDestory(self.owner.matchId, self.owner.spaceID)
-		pass
-
+		self.componentObj.onRoomDestory(self.roomKeyC, self.owner.spaceID)
 

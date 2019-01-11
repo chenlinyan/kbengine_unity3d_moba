@@ -9,7 +9,7 @@ class FrameSync(KBEngine.EntityComponent):
 
 	def onAttached(self, owner):
 		"""
-		"""			
+		"""
 		INFO_MSG("Operation::onAttached(): owner=%i" % (owner.id))
 
 		self.frameMgr = KBEngine.createEntity("FrameSyncMgr", self.owner.spaceID, tuple( self.owner.position), tuple( self.owner.direction), {})

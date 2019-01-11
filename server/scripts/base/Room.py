@@ -15,18 +15,16 @@ class Room(KBEngine.Space):
 	"""
 	def __init__(self):
 		KBEngine.Entity.__init__(self)
-
-		# self.cellData["roomKeyC"] = self.componentBaseMatcherRoom.roomKey
 		pass
 
 	def onGetCell(self):
-		#KBEngine.globalData["Halls"].onRoomGetCell(self, self.roomKey)
 		pass
 
 	def onLoseCell(self):
 		self.destroy()
+
 		DEBUG_MSG("Room_base_onLoseCell::Room_destroy")
-		#KBEngine.globalData["Halls"].onRoomStateChanged(self.roomKey, GameConstants.GAMESTATE_END)
+
 
 	def enterRoom(self, entityCall):
 		pass
@@ -36,19 +34,22 @@ class Room(KBEngine.Space):
 
 	def onDestory(self):
 		DEBUG_MSG("Room_%i is Destroy!" % self.roomKey)
-		pass
+
 
 	def onTimer(self, id, userArg):
 		pass
 
-	#统计结果
+
 	def statisticalResult(self, entityId, teamId, value):
+		'''
+		统计结果
+		'''
 		pass
 
 	def anayizeResults(self):
 		pass
 
 	def transmitResults(self, teamId, endValue):
-			#向客戶端传输结算数据
+		# 向客戶端传输结算数据
 		pass
 

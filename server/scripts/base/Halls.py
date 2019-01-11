@@ -28,7 +28,7 @@ class TeamMatchRule(MatchRule):
 		arriveMaxPlayers_B = False
 
 		maxPlayerCounts = matcher.maxPlayers/2
-		#防止maxPlayerCounts为单数，以双数相除来规定玩家队伍个数
+		# 防止maxPlayerCounts为单数，以双数相除来规定玩家队伍个数
 		if matcher.maxPlayers/2 != 0:
 			maxPlayerCounts = maxPlayerCounts + 1
 
@@ -66,45 +66,48 @@ class Halls(KBEngine.Entity):
 		KBEngine.globalData["Halls"] = self
 		self.configMatherCondition()
 
-	#设置匹配器条件
+
 	def configMatherCondition(self):
-		DEBUG_MSG("Hall::configMatherCondition:::componentMatcher")
+		'''
+		设置匹配器条件
+		'''
 		self.componentMatcher.minPlayers = 2
 		self.componentMatcher.maxPlayers = 10
 		self.componentMatcher.addMatchRule(TeamMatchRule())
 		self.componentMatcher.addCreateRoomRule(HeroChooseRule())
-		pass
 
 	def joinMatch(self, entityCall, playerData):
 		matchObjId = self.componentMatcher.joinMatch(entityCall, 0, playerData)
+
 		if matchObjId < 0:
-			DEBUG_MSG("Halls_enterStartGame: avatar[%i] match failed!" % (entityCall.id))
+			DEBUG_MSG("Halls_joinMatch: avatar[%i] match failed!" % (entityCall.id))
+
 		return matchObjId
 
 	def exitMatch(self, entityId, matchId):
-		DEBUG_MSG("Halls_exitMatch_entityId[%i], matchObjId::[%i]" % (entityId, matchId))
+		DEBUG_MSG("Halls_exitMatch::entityId[%i], matchObjId::[%i]" % (entityId, matchId))
 
 		if matchId < 0:
 			return False
 		else:
-			#如果该玩家所处的匹配池正处于匹配状态，那么该玩家是被允许退出匹配的
-			#若匹配池状态为已完成匹配，那是不允许退出的
+			# 如果该玩家所处的匹配池正处于匹配状态，那么该玩家是被允许退出匹配的
+			# 若匹配池状态为已完成匹配，那是不允许退出的
 			if self.componentMatcher.exitMatch(entityId, matchId):
-				DEBUG_MSG("Halls_exitMatch_result[true]::[%i]" % entityId)
+				DEBUG_MSG("Halls_exitMatch::result is true! entityId[%i]" % entityId)
 				return True
 			else:
 				return False
 
 	def acquireAllPlayersMatchData(self, matchId):
 		return self.componentMatcher.acquireAllPlayersMatchData(matchId)
-		pass
 
 	def acquireOnePlayerMatchData(self, matchId, entityId):
 		return self.componentMatcher.acquireOnePlayerMatchData(matchId, entityId)
-		pass
 
 	def matchDataChanged(self, matchId, entityCall, playerData):
-		#当前需改玩家数据属性成功
+		'''
+		当前需改玩家数据属性成功
+		'''
 		self.componentMatcher.matchDataChanged(matchId, entityCall, playerData)
 
 
