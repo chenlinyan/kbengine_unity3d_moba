@@ -19,14 +19,14 @@ class Room(KBEngine.Space):
 		# self.cellData["roomKeyC"] = self.componentBaseMatcherRoom.roomKey
 		pass
 
-
 	def onGetCell(self):
 		#KBEngine.globalData["Halls"].onRoomGetCell(self, self.roomKey)
 		pass
 
 	def onLoseCell(self):
+		self.destroy()
+		DEBUG_MSG("Room_base_onLoseCell::Room_destroy")
 		#KBEngine.globalData["Halls"].onRoomStateChanged(self.roomKey, GameConstants.GAMESTATE_END)
-		pass
 
 	def enterRoom(self, entityCall):
 		pass

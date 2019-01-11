@@ -47,7 +47,6 @@ class TeamMatchRule(MatchRule):
 			return False
 		return True
 
-
 class HeroChooseRule(CreateRoomRule):
 	def check(self, matcher, allPlayersData):
 		DEBUG_MSG("HeroChooseRule_check:: str(%s)" % str(allPlayersData))
@@ -65,10 +64,6 @@ class Halls(KBEngine.Entity):
 
 		# 向全局共享数据中注册这个管理器的entityCall以便在所有逻辑进程中可以方便的访问
 		KBEngine.globalData["Halls"] = self
-
-		#進入大廳中所有的avatars
-		#self.avatars = {}
-
 		self.configMatherCondition()
 
 	#设置匹配器条件
@@ -80,47 +75,14 @@ class Halls(KBEngine.Entity):
 		self.componentMatcher.addCreateRoomRule(HeroChooseRule())
 		pass
 
-	#注冊进入大廳
-	# def registerHalls(self, entityCall, name):
-	# 	if(not self.avatars.__contains__(entityCall.id)):
-	# 		self.avatars[entityCall.id] = {}
-	# 	avatarInfos = self.avatars[entityCall.id]
-
-	# 	#属性赋值
-	# 	avatarInfos["entityCall"] = entityCall
-	# 	avatarInfos["name"] 	  = name
-	# 	DEBUG_MSG("registerHalls_success_avatar[%i]" % entityCall.id)
-
-	# #反注册退出大廳
-	# def deregisterHalls(self, entityId):
-	# 	DEBUG_MSG("Halls_deregisterHalls_entityId(%i)" % (entityId))
-	# 	if(self.avatars.__contains__(entityId)):
-	# 		del self.avatars[entityId]
-	# 	else:
-	# 		DEBUG_MSG("Halls_deregisterHalls_entityId(%i)  is no exit(avatars)" % (entityId))
-
-	# def ifExitHalls(self, entityId):
-	# 	if(self.avatars.__contains__(entityId)):
-	# 		return True
-	# 	else:
-	# 		return False
-
 	def joinMatch(self, entityCall, playerData):
-		#if self.ifExitHalls(entityCall.id):
 		matchObjId = self.componentMatcher.joinMatch(entityCall, 0, playerData)
 		if matchObjId < 0:
 			DEBUG_MSG("Halls_enterStartGame: avatar[%i] match failed!" % (entityCall.id))
-		#self.avatars[entityCall.id]["matchId"] = matchObjId
-		#else:
-		#	DEBUG_MSG("Halls_enterStartGame: avatar[%i] is no regist halls!" % (entityCall.id))
 		return matchObjId
 
 	def exitMatch(self, entityId, matchId):
-		# avatarData = self.avatars[entityId]
-		# if not avatarData.__contains__("matchId"):
-		# 	return
-		# matchId    = avatarData["matchId"]
-		DEBUG_MSG("Halls_leaveGame_entityId[%i], matchObjId::[%i]" % (entityId, matchId))
+		DEBUG_MSG("Halls_exitMatch_entityId[%i], matchObjId::[%i]" % (entityId, matchId))
 
 		if matchId < 0:
 			return False
@@ -128,7 +90,7 @@ class Halls(KBEngine.Entity):
 			#如果该玩家所处的匹配池正处于匹配状态，那么该玩家是被允许退出匹配的
 			#若匹配池状态为已完成匹配，那是不允许退出的
 			if self.componentMatcher.exitMatch(entityId, matchId):
-				DEBUG_MSG("Halls_leaveGame_result[true]::[%i]" % entityId)
+				DEBUG_MSG("Halls_exitMatch_result[true]::[%i]" % entityId)
 				return True
 			else:
 				return False
@@ -145,9 +107,6 @@ class Halls(KBEngine.Entity):
 		#当前需改玩家数据属性成功
 		self.componentMatcher.matchDataChanged(matchId, entityCall, playerData)
 
-
-	def returnHalls(self, entityId):
-		self.leaveGame(entityId)
 
 
 

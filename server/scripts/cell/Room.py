@@ -46,6 +46,7 @@ class Room(KBEngine.Space):
 
 	def onTimer(self, id, userArg):
 		if TIMER_TYPE_DESTROY == userArg:
+			self.componentFrameSync.stop()
 			self.delTimer(id)
 			self.onDestroyTimer()
 
@@ -108,16 +109,14 @@ class Room(KBEngine.Space):
 			return
 
 		if self.gameStateC == GameConstants.GAMESTATE_READY_GAME:
+			self.gameStateC == GameConstants.GAMESTATE_PLAYING
 			for avatar in self.teamA.values():
 				avatar.client.onReadyBattle()
 			for avatar in self.teamB.values():
 				avatar.client.onReadyBattle()
-
-			self.gameStateC == GameConstants.GAMESTATE_BEGIN
 			self.addTimer(GameConfigs.GAME_READY_TIME, 0, TIMER_TYPE_READY)
 		else:
 			entityCall.client.onReadyBattle()
-
 		pass
 
 	def startBattle(self, entityCall):
@@ -131,6 +130,9 @@ class Room(KBEngine.Space):
 		'''
 			玩家选择自己的英雄,并判断当前是否需要可以进入游戏
 		'''
+		#統計结果
+		self.gameStateC = GameConstants.GAMESTATE_STATISTICAL
+
 		#调用帧同步组件，结束幀同步
 		self.componentFrameSync.stop()
 
@@ -141,6 +143,7 @@ class Room(KBEngine.Space):
 			avatar.onPushStatisticalResult(winTeamId)
 		for avatar in self.teamB:
 			avatar.onPushStatisticalResult(winTeamId)
+
 
 		self.addTimer(1, 0, TIMER_TYPE_DESTROY)
 

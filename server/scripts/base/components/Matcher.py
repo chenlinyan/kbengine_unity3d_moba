@@ -53,8 +53,10 @@ class Matcher(KBEngine.EntityComponent):
 		self.loadId = {}
 
 	def onAttached(self, owner):
-		KBEngine.globalData["HallsMatcher"] = {"owner":self.owner, "name":self.name}
-		DEBUG_MSG("mather instances:: %s" % (KBEngine.globalData["HallsMatcher"]["owner"]))
+		# KBEngine.globalData["HallsMatcher"] = {"owner":self.owner, "name":self.name}
+		# DEBUG_MSG("mather instances:: %s" % (KBEngine.globalData["HallsMatcher"]["owner"]))
+		KBEngine.globalData["HallsMatcher"] = self.owner
+		DEBUG_MSG("mather instances:: %s" % (KBEngine.globalData["HallsMatcher"]))
 		pass
 
 	def onDetached(self, owner):
@@ -205,7 +207,7 @@ class Matcher(KBEngine.EntityComponent):
 		return True
 
 	def checkMatchDataToJoinRoom(self, matchData):
-		matchFlag   = self.ifArriveMinPlayers(matchData)
+		matchFlag = self.ifArriveMinPlayers(matchData)
 		creRoomflag = self.checkCreateRoomRules(matchData)
 		if matchFlag and creRoomflag:
 			#如果当前到达开启房间的条件,则状态设置为匹配结束ID_MATCH_END

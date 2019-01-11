@@ -17,11 +17,6 @@
 			<Persistent>		true				</Persistent>
 		</roomKey>
 
-		<roomCellEntity>
-			<Type>				ENTITYCALL			</Type>
-			<Flags>				CELL_PUBLIC			</Flags>
-		</roomCellEntity>
-
 		<name>
 			<Type>				UNICODE				</Type>
 			<Flags>				ALL_CLIENTS			</Flags>
@@ -108,10 +103,6 @@
 		<onPushStatisticalResult>
 			<Arg>			TEAM_ID					</Arg>
 		</onPushStatisticalResult>
-
-		<onPushAvatarCurrentScene>
-			<Arg>			UINT32					</Arg>
-		</onPushAvatarCurrentScene>
 
 		<onPushMatchPlayersData>
 			<Arg>			MATCHING_INFOS_LIST		</Arg>

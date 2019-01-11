@@ -47,7 +47,6 @@ class Avatar(KBEngine.Proxy):
 		self.registerEvent(MatchAvatarReport.eventNameMatchDataChanged,	 self.onRecvPlayerMatchDataChanged)
 		self.registerEvent(MatchAvatarReport.eventNameExitMatch,	 	 self.onRecvPlayerExitMatch)
 
-
 	def destroySelf(self):
 		"""
 		"""
@@ -146,22 +145,6 @@ class Avatar(KBEngine.Proxy):
 		KBEngine method.
 		entity的cell部分实体被创建成功
 		"""
-
-		#将自身需要的数据都加载到对应的room部分上
-		# roomBaseEntity = self.componentMatcherAvatar.roomBaseEntity
-		# roomBaseEntity.enterRoom(self)
-
-		#当前游戏状态为:游戏中
-		self.gameState = GameConstants.GAMESTATE_PLAYING
-		# roomCellEntity = self.componentMatcherAvatar.roomCellEntity
-		# roomCellEntity.enterRoom(self.cell, GameConfigs.TEAM_A_ID)
-
-		#当前游戏状态为:选择英雄画面部分
-		# self.gameState = GameConstants.GAMESTATE_SELECT_HERO
-
-		# #可以自行塞所需的数值
-		# self.cell.addBaseArgs(roomCellEntity, self.gameState)
-
 		DEBUG_MSG('Avatar::onGetCell: %s' % self.cell)
 
 	def onLoseCell(self):
@@ -175,8 +158,8 @@ class Avatar(KBEngine.Proxy):
 		if self._destroyTimer > 0:
 			self.destroySelf()
 		else:
-			self.gameState = GameConstants.GAMESTATE_END
-		# 否则由cell发起销毁， 那么说明游戏结束了
+			# 否则由cell发起销毁， 那么说明游戏结束了
+			self.gameState = GameConstants.GAMESTATE_HALL
 
 	def onRestore(self):
 		"""
@@ -231,12 +214,6 @@ class Avatar(KBEngine.Proxy):
 			self.gameState = GameConstants.GAMESTATE_HALL
 			return True
 		return False
-
-	def returnHalls(self):
-		pass
-
-	def gameOver(self):
-		pass
 
 	def onRecvPlayersJoinMatch(self, playersData, state):
 		'''
@@ -326,25 +303,19 @@ class Avatar(KBEngine.Proxy):
 		#需要向当前的玩家所在的匹配池中修改数据
 		self.matchDataChanged(self, {"heroId":heroId})
 
-	# def reqSkillLst(self):
-	# 	#返回当前的英雄的技能列表
-	# 	if self.client:
-	# 		self.client.onReqsSkillLstResult(self.getSkillList())
-	# 	return
-
 	def getHeroInfo(self, heroId):
 		return self.conf.getTable('d_hero.csv').get(heroId, None)
 
-	def getSkillList(self, heroInfos):
-		if self.cell or heroInfos is None:
+	def getSkillList(self, heroInfo):
+		if self.cell or heroInfo is None:
 			DEBUG_MSG("Avatar_base_getSkillIdList:: heroInfos is None!!!")
 			return []
 
 		skillIdList = []
-		skillIdList.append(heroInfos["skill_1"])
-		skillIdList.append(heroInfos["skill_2"])
-		skillIdList.append(heroInfos["skill_3"])
-		skillIdList.append(heroInfos["skill_4"])
+		skillIdList.append(heroInfo["skill_1"])
+		skillIdList.append(heroInfo["skill_2"])
+		skillIdList.append(heroInfo["skill_3"])
+		skillIdList.append(heroInfo["skill_4"])
 
 		if len(skillIdList) <= 0:
 			DEBUG_MSG("Avatar_base_getSkillIdList:: skillIdList len <= 0!!!")
@@ -393,6 +364,9 @@ class Avatar(KBEngine.Proxy):
 		self.disconnectFlag = True
 
 	def dealReconnection(self):
+		'''
+			处理重连问题
+		'''
 		self.disconnectFlag = False
 
 		if self.gameState < GameConstants.GAMESTATE_PLAYING and self.cell:

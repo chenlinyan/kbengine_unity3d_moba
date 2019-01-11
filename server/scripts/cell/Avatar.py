@@ -34,7 +34,6 @@ class Avatar(KBEngine.Entity):
 		KBEngine method.
 		entity销毁
 		"""
-		# DEBUG_MSG("Avatar::onDestroy: %i.gameState %i" % (self.id, self.gameStateC))
 		pass
 
 	def relive(self, exposed, type):
@@ -46,7 +45,6 @@ class Avatar(KBEngine.Entity):
 			return
 
 		DEBUG_MSG("Avatar::relive: %i, type=%i." % (self.id, type))
-
 
 	def getCurrRoomBase(self):
 		"""
@@ -68,13 +66,11 @@ class Avatar(KBEngine.Entity):
 
 		return KBEngine.entities.get(self.roomBaseId, None)
 
-
 	def getHeroId(self):
 		return self.heroId
 
 	def setTeamId(self, teamId):
 		self.teamId = teamId
-		pass
 
 	def getTeamId(self):
 		DEBUG_MSG("getTeamIdgetTeamIdgetTeamId:::[%s][%s]" % (self.teamId, self))
@@ -82,8 +78,7 @@ class Avatar(KBEngine.Entity):
 
 	def submitStatisticalResult(self, winTeamId):
 		#提交统计结果
-		self.roomCellEntity.statisticalResult(winTeamId)
-		pass
+		self.getCurrRoom().statisticalResult(winTeamId)
 
 	def getGameState(self):
 		self.gameStateC = self.getCurrRoom().getGameState()
