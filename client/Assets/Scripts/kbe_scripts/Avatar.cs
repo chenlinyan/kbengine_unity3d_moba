@@ -93,10 +93,6 @@ namespace KBEngine
             Debug.Log("matchInfosDict::::count" + matchInfosDict.Count + ",infos::::count:::" + infos.values.Count);
         }
 
-        public override void onPushAvatarCurrentScene(UInt32 arg1)
-        {
-        }
-
         public override void onPushStatisticalResult(Int32 arg1)
         {
         }
