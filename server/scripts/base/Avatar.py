@@ -41,7 +41,6 @@ class Avatar(KBEngine.Proxy):
 		self._destroyTimer = 0
 		self._adjustFrameIdTimer = 0
 
-
 		self.registerEvent(MatchAvatarReport.eventNameJoinMatch,	 	 self.onRecvPlayersJoinMatch)
 		self.registerEvent(MatchAvatarReport.eventNameMatchStateChanged, self.onRecvPlayerMatchStateChanged)
 		self.registerEvent(MatchAvatarReport.eventNameMatchDataChanged,	 self.onRecvPlayerMatchDataChanged)
@@ -163,17 +162,23 @@ class Avatar(KBEngine.Proxy):
 		"""
 		DEBUG_MSG("Avatar_base_reqJoinGame::[%s][%i]" %(self.cellData["name"], self.id))
 
-		resultId = self.joinMatch()
+		returnFlag = self.joinMatch()
+
+		DEBUG_MSG("Avatar_base_reqJoinGame_returnFlag[%i]" % returnFlag)
+
 		if self.client:
-			self.client.onJoinGameResult(resultId)
+			self.client.onJoinGameResult(returnFlag)
 
 	def reqExitGame(self):
 		"""
 		退出游戏
 		"""
-		resultId = self.exitMatch()
+		returnFlag, exitResult = self.exitMatch()
+		if not returnFlag:
+			DEBUG_MSG("Avatar_base_reqExitGame_returnFlag[%s]" % exitResult)
+
 		if self.client:
-			self.client.onExitGameResult(resultId)
+			self.client.onExitGameResult(returnFlag)
 
 	def joinMatch(self):
 		"""
@@ -181,11 +186,13 @@ class Avatar(KBEngine.Proxy):
 		"""
 		self.gameState = GameConstants.GAMESTATE_MATCHING
 		playerData = {"entityCall":self, "id":self.id, "name":self.cellData["name"], "teamId": 0, "heroId": 0, "heroIdLst":self.cellData["heroIdLst"] }
-		self.matchId  = KBEngine.globalData["Halls"].joinMatch(self, playerData)
+		matchResults = KBEngine.globalData["Halls"].joinMatch(self, playerData)
+		self.matchId = matchResults[0]
 
-		if self.matchId == -1:
-			# 返回-1,表明匹配失败
+		if self.matchId < 0:
+			# 返回为-1,表明匹配失败
 			self.gameState = GameConstants.GAMESTATE_HALL
+			DEBUG_MSG("Avatar_base_joinMatch_errResult[%s]" % matchResult)
 			return False
 
 		return True
@@ -194,14 +201,14 @@ class Avatar(KBEngine.Proxy):
 		"""
 		退出匹配
 		"""
-		if KBEngine.globalData["Halls"].exitMatch(self.id, self.matchId):
+		exitResults = KBEngine.globalData["Halls"].exitMatch(self.id, self.matchId)
+		if exitResults[0]:
 			self.cellData["heroId"] = 0
 			self.cellData["teamId"] = 0
 			self.heroId = 0
 			self.gameState = GameConstants.GAMESTATE_HALL
-			return True
 
-		return False
+		return exitResults
 
 	def onRecvPlayersJoinMatch(self, playersData, state):
 		'''

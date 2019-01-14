@@ -41,8 +41,6 @@ class Room(KBEngine.Space):
 
 	def testFun(self):
 		self._testFunTimer = self.addTimer(120, 20, TIMER_TYPE_DESTROY)
-		pass
-
 
 	def onTimer(self, id, userArg):
 		if TIMER_TYPE_DESTROY == userArg:
@@ -50,13 +48,13 @@ class Room(KBEngine.Space):
 			self.delTimer(id)
 			self.onDestroyTimer()
 
-		if(TIMER_TYPE_READY == userArg):
+		if TIMER_TYPE_READY == userArg:
 			# 调用帧同步组件，开启幀同步
 			self.componentFrameSync.start()
 			self.startBattleState = True
 
 			# 删除定时器
-			del(id)
+			self.delTimer(id)
 			DEBUG_MSG("room_avatar_onReadyForBattle")
 
 	def onDestroyTimer(self):

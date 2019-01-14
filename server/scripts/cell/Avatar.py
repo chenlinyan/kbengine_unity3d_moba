@@ -16,6 +16,7 @@ class Avatar(KBEngine.Entity):
 		# self.position = GameUtils.randomPosition3D(self.modelRadius)
 
 		self.roomBaseId = -1
+
 		# 玩家可通过全局数据找到相对应的房间,加载进入房间内
 		self.getCurrRoom().enterRoom(self, self.teamId)
 
@@ -58,7 +59,7 @@ class Avatar(KBEngine.Entity):
 		if self.roomBaseId == -1:
 			roomBase = self.getCurrRoomBase()
 
-			DEBUG_MSG("Avatar_cell_getCurrRoomBase::spaceID[%i]_roomBase[%s]" % (self.spaceID,str(roomBase)))
+			DEBUG_MSG("Avatar_cell_getCurrRoomBase::spaceID[%i]_roomBase[%s]" % (self.spaceID, str(roomBase)))
 
 			self.roomBaseId = roomBase.id
 			if roomBase is None:

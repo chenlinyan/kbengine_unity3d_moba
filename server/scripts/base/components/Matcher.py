@@ -3,14 +3,37 @@ import KBEngine
 from KBEDebug import *
 import Functor
 
-ID_MATCH_BEGIN = 0
-ID_MATCHING    = 1
-ID_MATCH_CREROOMRULE   = 2
-ID_MATCH_END   = 3
+#错误码
+ERRCODE_MAXPALYERS_EQUAL_ZERO 			= "MaxPlayers is equal to 0!"
+ERRCODE_MAXPALYERS_LESS_THAN_MINPALYERS = "MaxPlayers is less than minPlayers!"
+ERRCODE_ENTER_END_OF_MATCH 				= "The match has entered the end of the match!"
+ERRCODE_NO_SATISY_MATCHRULE 			= "The match rule is not satisfied!"
+ERRCODE_NO_SATISY_CREATEROOMRULE		= "The createRoom rule is not satisfied!"
 
-ID_LOADING_TIME   = 4
-ID_ROOM_CREATION_BEGIN       = 5
-ID_ROOM_CREATION_COMPLETE    = 6
+
+#代码标号
+CODE_CHECK_BUILDIN_CONDITION 	= "Build-In conditions checked successfully!"
+CODE_CHECK_MATCH_RULE 			= "MatchRule checked successfully!"
+CODE_CHECK_CREATEROOM_RULE 		= "CrateRoomRule checked successfully!"
+CODE_CHECK_MATCH_CONDITION 		= "Match conditions checked successfully!"
+CODE_JOIN_MATCH_SUCCESS 		= "Join match successfully!"
+CODE_EXIT_MATCH_SUCCESS 		= "Exit match successfully!"
+CODE_JOIN_ROOM_SUCCESS 			= "Join room successfully!"
+
+CODE_REACH_MINUSERS 			= "The minimum number has been reached!"
+CODE_REACH_MAXUSERS 			= "The maximum number has been reached!"
+CODE_NO_REACH_MINUSERS 			= "The minimum number has not been reached!"
+CODE_NO_REACH_MAXUSERS 			= "The maximum number has not been reached!"
+
+
+# 匹配状态
+ID_MATCH_BEGIN 				= 0
+ID_MATCHING 				= 1
+ID_MATCH_CREROOMRULE 		= 2
+ID_MATCH_END 				= 3
+ID_LOADING_TIME 			= 4
+ID_ROOM_CREATION_BEGIN 		= 5
+ID_ROOM_CREATION_COMPLETE 	= 6
 
 # 常量标识
 INVALIDID_MATCHID = -1
@@ -75,30 +98,24 @@ class Matcher(KBEngine.EntityComponent):
 		DEBUG_MSG("Matcher_joinMatch::avatar[%i], matchId[%i] " % (entityCall.id, matchId))
 
 		reqsMatchId = INVALIDID_MATCHID
-		if self.checkSettingsForError():
-			return reqsMatchId
+		matchResult = self.checkSettingsForError()
+		if matchResult[0]:
+			return reqsMatchId, matchResult[1]
 
 		# matchId <  0: 表示总要创建一个新的匹配对象
 		# matchId == 0: 表示随机加入的匹配池的任意匹配对象
 		# matchId > 0 : 表示加入指定的匹配对象
 		if matchId < 0:
-			reqsMatchId = self.createNewMatch(playerData)
+			reqsMatchId, matchResult = self.createNewMatch(playerData)
 		elif matchId == 0:
-			reqsMatchId = self.randomJoinMatch(playerData)
+			reqsMatchId, matchResult = self.randomJoinMatch(playerData)
 		else:
-			reqsMatchId = self.assignJoinMatch(matchId, playerData)
+			reqsMatchId, matchResult = self.assignJoinMatch(matchId, playerData)
 
 		if reqsMatchId < 0:
-			return reqsMatchId
+			return reqsMatchId, matchResult[1]
 
 		DEBUG_MSG("Matcher_joinMatch::avatar[%i], matchId[%i], reqsMatchId[%i] " % (entityCall.id, matchId, reqsMatchId))
-
-		# # 检查匹配条件是否满足
-		# matchData = self.matchPools[reqsMatchId]
-		# if not self.checkMatchCondition(matchData, playerData):
-		# 	DEBUG_MSG("entity[%i] check failed of matchConditions!" % (entityCall.id))
-		# 	return INVALIDID_MATCHID
-		# else:
 
 		# 获取entity对应的相应组件MatchAvatarReport
 		cmptObj = entityCall.getComponent("MatchAvatarReport")
@@ -110,7 +127,8 @@ class Matcher(KBEngine.EntityComponent):
 		matchData["playersData"][entityCall.id] = playerData
 
 		# 再次判断匹配池中是否到达最大人数，到达人数则移除
-		if self.ifArriveMaxPlayers(matchData):
+		matchResult = self.ifArriveMaxPlayers(matchData)
+		if matchResult[0]:
 			if reqsMatchId in self.matchIds:
 				self.matchIds.remove(reqsMatchId)
 
@@ -118,10 +136,11 @@ class Matcher(KBEngine.EntityComponent):
 		self.broadcastPlayerJoin(entityCall.id, cmptObj, matchData)
 
 		# 检查条件是否达到可以加入房间
-		if self.checkMatchDataToJoinRoom(matchData):
+		matchResult = self.checkMatchDataToJoinRoom(matchData)
+		if matchResult[0]:
 			self.enterRoom(reqsMatchId, cmptObj, entityCall)
 
-		return reqsMatchId
+		return reqsMatchId, CODE_JOIN_MATCH_SUCCESS
 
 	def exitMatch(self, entityId, matchId):
 		"""
@@ -132,11 +151,12 @@ class Matcher(KBEngine.EntityComponent):
 		matchData = self.matchPools.get(matchId)
 		if matchData is None:
 			DEBUG_MSG("Matcher_exitMatch::self.matchPools not exit matchObjId[%i] " % (matchId))
-			return True
+
+			return True, CODE_EXIT_MATCH_SUCCESS
 
 		playersData = matchData["playersData"]
 		if matchData["state"] > ID_MATCH_END:
-			return False
+			return False, ERRCODE_ENTER_END_OF_MATCH
 		else:
 			if entityId in playersData.keys():
 				self.broadcastExitMatch(playersData, entityId)
@@ -145,19 +165,19 @@ class Matcher(KBEngine.EntityComponent):
 				# 如果当下没有玩家数据，则释放匹配池中对象的匹配对象
 				if len(playersData) == 0:
 					del self.matchPools[matchId]
+					if matchId in self.matchIds:
+						self.matchIds.remove(matchId)
 
-				if matchId in self.matchIds:
-					self.matchIds.remove(matchId)
-
-			return True
+			return True, CODE_EXIT_MATCH_SUCCESS
 
 	def createNewMatch(self, playerData):
 		'''
 		没有可用资源，便创建一个新的匹配对象
 		'''
 		#如果不符合匹配条件，则不创建新的匹配对象
-		if not self.checkMatchCondition({}, playerData):
-			return INVALIDID_MATCHID
+		matchResult = self.checkMatchCondition({}, playerData)
+		if not matchResult[0]:
+			return INVALIDID_MATCHID, matchResult[1]
 
 		# loadTimeOfBefCreRoom：表示创建房间前的等待加载时间
 		baseMatchArg = {"matchId": self.matchId,
@@ -174,123 +194,128 @@ class Matcher(KBEngine.EntityComponent):
 		DEBUG_MSG("Matcher_createNewMatch::self.matchId[%i][%i]" % (self.matchId, baseMatchArg["matchId"]))
 
 		self.matchId = self.matchId + 1
-		return baseMatchArg["matchId"]
+		return baseMatchArg["matchId"], matchResult[1]
 
 	def randomJoinMatch(self, playerData):
+		DEBUG_MSG("Matcher_randomJoinMatch::self.matchIds[%s]" % (str(self.matchIds)))
+
 		if self.matchIds:
 			matchId = self.matchIds[0]
-			if self.checkMatchCondition(self.matchPools[matchId], playerData):
-				return matchId
-			return INVALIDID_MATCHID
+			matchResult = self.checkMatchCondition(self.matchPools[matchId], playerData)
+			if matchResult[0]:
+				return matchId, matchResult[1]
+			return INVALIDID_MATCHID, matchResult[1]
 		else:
 			return self.createNewMatch(playerData)
 
 	def assignJoinMatch(self, matchId, playerData):
 		matchId = self.matchPools.get(matchId, INVALIDID_MATCHID)
-		if matchId != INVALIDID_MATCHID and self.checkMatchCondition(self.matchPools[matchId], playerData):
-			return matchId
+		matchResult = self.checkMatchCondition(self.matchPools[matchId], playerData)
+		if matchId != INVALIDID_MATCHID and matchResult[0]:
+			return matchId, matchResult[1]
 
-		return INVALIDID_MATCHID
+		return INVALIDID_MATCHID, matchResult[1]
 
 	def checkMatchCondition(self, matchData, playerData):
 		allPlayersData = (matchData.get("playersData", {})).values()
-		if self.checkBuildInCondition(allPlayersData, playerData) and \
-			self.checkMatchRules(allPlayersData, playerData):
-			return True
+		matchResult = self.checkMatchRules(allPlayersData, playerData)
+		bulidInResult = self.checkBuildInCondition(allPlayersData, playerData)
 
-		return False
+		DEBUG_MSG("Matcher_checkMatchCondition::matchResult[%s], bulidInResult[%s]" % (str(matchResult), str(bulidInResult)))
+
+		if bulidInResult[0]:
+			if matchResult[0]:
+				return True, CODE_CHECK_MATCH_CONDITION
+			else:
+				return matchResult
+		else:
+			return bulidInResult
+
 
 	def checkSettingsForError(self):
 		'''
 		检查常规设置是否出错
 		'''
 		if self.maxPlayers == 0:
-			DEBUG_MSG("Matcher_checkSettingsForError::maxPlayers is equal to 0!")
-			return True
+			return True, ERRCODE_MAXPALYERS_EQUAL_ZERO
 		elif self.maxPlayers > 0 and self.minPlayers > self.maxPlayers:
-			DEBUG_MSG("Matcher_checkSettingsForError::maxPlayers is less than minPlayers! minPlayers.len[%i]_maxPlayers.len[%i]" % (self.minPlayers, self.maxPlayers))
-			return True
+			return True, ERRCODE_MAXPALYERS_LESS_THAN_MINPALYERS
 		else:
-			return False
+			return False, CODE_CHECK_MATCH_CONDITION
 
 	def checkBuildInCondition(self, allPlayersData, playerData):
 		if self.maxPlayers > 0 and len(allPlayersData) >= self.maxPlayers:
-			return False
+			return False, CODE_REACH_MAXUSERS
 
-		return True
+		return True, CODE_CHECK_BUILDIN_CONDITION
 
 	def checkMatchRules(self, allPlayersData, playerData):
 		for matchRule in self.matchRules:
 			if not matchRule.check(self, allPlayersData, playerData):
-				return False
+				return False, ERRCODE_NO_SATISY_MATCHRULE
 
-		return True
+		return True, CODE_CHECK_MATCH_RULE
 
 	def checkCreateRoomRules(self, matchData):
 		for rule in self.createRoomRules:
 			if not rule.check(self, matchData["playersData"].values()):
-				DEBUG_MSG("Matcher_checkCreateRoomRules::returns False!")
-				return False
+				return False, ERRCODE_NO_SATISY_CREATEROOMRULE
 
 		DEBUG_MSG("Matcher_checkCreateRoomRules::returns True!")
-		return True
+
+		return True, CODE_CHECK_CREATEROOM_RULE
 
 	def checkMatchDataToJoinRoom(self, matchData):
-		matchFlag = self.ifArriveMinPlayers(matchData)
-		creRoomflag = self.checkCreateRoomRules(matchData)
+		matchFlag, matchResult = self.ifArriveMinPlayers(matchData)
+		creRoomflag, creRoomResult = self.checkCreateRoomRules(matchData)
+
+		DEBUG_MSG("Matcher_checkMatchDataToJoinRoom::matchFlag[%i], creRoomflag[%i]" % (matchFlag, creRoomflag))
 
 		if matchFlag and creRoomflag:
 			# 如果当前到达开启房间的条件，则状态设置为匹配结束ID_MATCH_END
 			if matchData["state"] <= ID_MATCHING:
 				matchData["state"] = ID_MATCH_END
 
-			DEBUG_MSG("Matcher_checkMatchDataToJoinRoom::returns True!, matchData[state] = [%i]" % matchData["state"])
-			return True
+			return True, CODE_JOIN_ROOM_SUCCESS
 		elif matchFlag and not creRoomflag:
 			# 如果当前到达开启房间的条件，则状态设置为匹配结束ID_MATCH_END
 			if matchData["state"] <= ID_MATCHING:
 				matchData["state"] = ID_MATCH_CREROOMRULE
+			return False, creRoomResult
 
-		return False
+		return False, matchResult
 
 	def checkMatchDataToJoinRoomByMatchId(self, matchId):
 		if matchId in self.matchPools:
-			return self.checkMatchDataToJoinRoom(self.matchPools[matchId])
+			matchFlag, matchResult = self.checkMatchDataToJoinRoom(self.matchPools[matchId])
+			return matchFlag
 		else:
 			return False
 
 	def ifArriveMaxPlayers(self, matchData):
 		if self.maxPlayers < 0:
-			DEBUG_MSG("Matcher_ifArriveMaxPlayers::maxPlayers is less than 0!")
-			return False
+			return False, CODE_NO_REACH_MAXUSERS
 
 		if len(matchData["playersData"]) < self.maxPlayers:
-			DEBUG_MSG("Matcher_ifArriveMaxPlayers::len(allPlayer) is less than maxPlayers!")
-			return False
+			return False, CODE_NO_REACH_MAXUSERS
 
-		return True
+		return True, CODE_REACH_MAXUSERS
 
 	def ifArriveMinPlayers(self, matchData):
-		if self.maxPlayers == 0:
-			DEBUG_MSG("Matcher_ifArriveMinPlayers::maxPlayers is equal to 0!")
-			return False
-
 		if self.minPlayers >= 0 and len(matchData["playersData"]) < self.minPlayers:
-			DEBUG_MSG("Matcher_ifArriveMinPlayers::len(allPlayer) is less than minPlayers! minPlayers.len[%i]_allPlayer.len[%i]" % (self.minPlayers, len(matchData["playersData"])))
-			return False
+			return False, CODE_NO_REACH_MINUSERS
 
-		DEBUG_MSG("Matcher_ifArriveMinPlayers::returns True!")
-		return True
+		return True, CODE_REACH_MINUSERS
 
 	def enterRoom(self, matchId, cmptObj, entityCall):
 		matchData = self.matchPools[matchId]
+		matchState = matchData["state"]
+		DEBUG_MSG("Matcher_enterRoom::matchId[%i], matchState[%i]" % (matchId, matchState))
 
-		DEBUG_MSG("Matcher_enterRoom::matchId[%i], matchState[%i]" % (matchId, matchData["state"]))
-
-		if matchData["state"] <= ID_MATCH_END:
+		if matchState <= ID_MATCH_END:
 			# 表示房间仍然未创建
-			if matchData["state"] != ID_LOADING_TIME and matchData["loadTimeOfBefCreRoom"] > 0:
-				matchData["state"] = ID_LOADING_TIME
+			if matchState != ID_LOADING_TIME and matchData["loadTimeOfBefCreRoom"] > 0:
+				matchState = ID_LOADING_TIME
 				# 倒计时加载时间处理
 				timeId = self.addTimer(matchData["loadTimeOfBefCreRoom"], 0, matchId)
 				self.loadId[timeId] = matchId
@@ -300,7 +325,7 @@ class Matcher(KBEngine.EntityComponent):
 				self.createRoom(matchId)
 
 				DEBUG_MSG("Matcher_enterRoom::::createRoom")
-		elif matchData["state"] >= ID_ROOM_CREATION_COMPLETE:
+		elif matchState >= ID_ROOM_CREATION_COMPLETE:
 			# 表示房间创建好了
 			roomDatas = matchData["roomData"]
 			roomEntityCall = roomDatas["roomCellEntityCall"]
@@ -315,7 +340,7 @@ class Matcher(KBEngine.EntityComponent):
 				DEBUG_MSG("Matcher_enterRoom::exitCellRoom[%i]" % (roomEntityCall.id))
 
 		# 通知各个玩家现在为等待创建和进入房间时
-		self.broadcastMatchState(matchData["playersData"], matchData["state"])
+		self.broadcastMatchState(matchData["playersData"], matchState)
 
 	def createRoom(self, matchId):
 		DEBUG_MSG("Matcher_createRoom::matchId[%i]" % matchId)

@@ -19,7 +19,6 @@ class MatchAvatarReport(KBEngine.EntityComponent):
 		pass
 
 	def createCell(self, roomBaseEntityCall, roomCellEntityCall, matchId, roomKey):
-		# playerData 玩家的属性，根据实际需求塞数值
 		self.matchId = matchId
 		self.roomKey = roomKey
 		self.roomBaseEntity = roomBaseEntityCall

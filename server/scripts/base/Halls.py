@@ -17,7 +17,9 @@ class TeamMatchRule(MatchRule):
 	def check(self, matcher, allPlayersData, playerData):
 		teamACount = 0
 		teamBCount = 0
+
 		DEBUG_MSG("TeamMatchRule_check:: str(%s)" % str(allPlayersData))
+
 		for existPlayer in allPlayersData:
 			if existPlayer["teamId"] == GameConfigs.TEAM_A_ID:
 				teamACount = teamACount + 1
@@ -28,6 +30,7 @@ class TeamMatchRule(MatchRule):
 		arriveMaxPlayers_B = False
 
 		maxPlayerCounts = matcher.maxPlayers/2
+
 		# 防止maxPlayerCounts为单数，以双数相除来规定玩家队伍个数
 		if matcher.maxPlayers/2 != 0:
 			maxPlayerCounts = maxPlayerCounts + 1
@@ -45,6 +48,7 @@ class TeamMatchRule(MatchRule):
 			playerData["teamId"] = GameConfigs.TEAM_B_ID
 		else:
 			return False
+
 		return True
 
 class HeroChooseRule(CreateRoomRule):
@@ -53,6 +57,7 @@ class HeroChooseRule(CreateRoomRule):
 		for existPlayer in allPlayersData:
 			if existPlayer["heroId"] == 0:
 				return False
+
 		return True
 
 class Halls(KBEngine.Entity):
@@ -77,26 +82,21 @@ class Halls(KBEngine.Entity):
 		self.componentMatcher.addCreateRoomRule(HeroChooseRule())
 
 	def joinMatch(self, entityCall, playerData):
-		matchObjId = self.componentMatcher.joinMatch(entityCall, 0, playerData)
+		matchResult = self.componentMatcher.joinMatch(entityCall, 0, playerData)
 
-		if matchObjId < 0:
+		if matchResult[0] < 0:
 			DEBUG_MSG("Halls_joinMatch: avatar[%i] match failed!" % (entityCall.id))
 
-		return matchObjId
+		return matchResult
 
 	def exitMatch(self, entityId, matchId):
 		DEBUG_MSG("Halls_exitMatch::entityId[%i], matchObjId::[%i]" % (entityId, matchId))
 
-		if matchId < 0:
-			return False
-		else:
-			# 如果该玩家所处的匹配池正处于匹配状态，那么该玩家是被允许退出匹配的
-			# 若匹配池状态为已完成匹配，那是不允许退出的
-			if self.componentMatcher.exitMatch(entityId, matchId):
-				DEBUG_MSG("Halls_exitMatch::result is true! entityId[%i]" % entityId)
-				return True
-			else:
-				return False
+		# 如果该玩家所处的匹配池正处于匹配状态，那么该玩家是被允许退出匹配的
+		# 若匹配池状态为已完成匹配，那是不允许退出的
+		exitResult = self.componentMatcher.exitMatch(entityId, matchId)
+		DEBUG_MSG("Halls_exitMatch::result is [%i]! entityId[%i]" % (exitResult[0], entityId))
+		return exitResult
 
 	def acquireAllPlayersMatchData(self, matchId):
 		return self.componentMatcher.acquireAllPlayersMatchData(matchId)
