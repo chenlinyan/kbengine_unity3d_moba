@@ -7,7 +7,6 @@ from KBEDebug import *
 import GameConfigs
 import GameConstants
 
-TIMER_TYPE_STATISTICAL = 1
 class Room(KBEngine.Space):
 	"""
 	一个可操控cellapp上真正space的实体
@@ -25,7 +24,6 @@ class Room(KBEngine.Space):
 
 		DEBUG_MSG("Room_base_onLoseCell::Room_destroy")
 
-
 	def enterRoom(self, entityCall):
 		pass
 
@@ -35,10 +33,8 @@ class Room(KBEngine.Space):
 	def onDestory(self):
 		DEBUG_MSG("Room_%i is Destroy!" % self.roomKey)
 
-
 	def onTimer(self, id, userArg):
 		pass
-
 
 	def statisticalResult(self, entityId, teamId, value):
 		'''

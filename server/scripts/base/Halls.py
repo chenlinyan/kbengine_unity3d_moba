@@ -54,6 +54,7 @@ class TeamMatchRule(MatchRule):
 class HeroChooseRule(CreateRoomRule):
 	def check(self, matcher, allPlayersData):
 		DEBUG_MSG("HeroChooseRule_check:: str(%s)" % str(allPlayersData))
+
 		for existPlayer in allPlayersData:
 			if existPlayer["heroId"] == 0:
 				return False
@@ -82,21 +83,26 @@ class Halls(KBEngine.Entity):
 		self.componentMatcher.addCreateRoomRule(HeroChooseRule())
 
 	def joinMatch(self, entityCall, playerData):
-		matchResult = self.componentMatcher.joinMatch(entityCall, 0, playerData)
 
-		if matchResult[0] < 0:
-			DEBUG_MSG("Halls_joinMatch: avatar[%i] match failed!" % (entityCall.id))
+		matchId = self.componentMatcher.joinMatch(entityCall, 0, playerData)
+		if matchId == -1:
+			errCode = self.componentMatcher.getLastErrorCode
+			DEBUG_MSG("Halls_joinMatch: avatar[%i] match failed!, errCode[%i]" % (entityCall.id, errCode))
 
-		return matchResult
+		return matchId
 
 	def exitMatch(self, entityId, matchId):
-		DEBUG_MSG("Halls_exitMatch::entityId[%i], matchObjId::[%i]" % (entityId, matchId))
+		DEBUG_MSG("Halls_exitMatch::entityId[%i], matchObjId[%i]" % (entityId, matchId))
 
 		# 如果该玩家所处的匹配池正处于匹配状态，那么该玩家是被允许退出匹配的
 		# 若匹配池状态为已完成匹配，那是不允许退出的
-		exitResult = self.componentMatcher.exitMatch(entityId, matchId)
-		DEBUG_MSG("Halls_exitMatch::result is [%i]! entityId[%i]" % (exitResult[0], entityId))
-		return exitResult
+		if not self.componentMatcher.exitMatch(entityId, matchId):
+			errCode = self.componentMatcher.getLastErrorCode
+			DEBUG_MSG("Halls_exitMatch::result is False! entityId[%i], errCode[%i]" % (entityId, errCode))
+
+			return False
+
+		return True
 
 	def acquireAllPlayersMatchData(self, matchId):
 		return self.componentMatcher.acquireAllPlayersMatchData(matchId)

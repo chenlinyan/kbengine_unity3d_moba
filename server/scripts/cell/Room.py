@@ -22,21 +22,11 @@ class Room(KBEngine.Space):
 	def __init__(self):
 		KBEngine.Entity.__init__(self)
 
-		# 把自己移动到一个不可能触碰陷阱的地方
-		self.position = (999999.0, 0.0, 0.0)
-
-		self.teamA  = {}
-		self.teamB  = {}
-		self._startBattleTime  = 0
-		self._destroyTimer 	   = 0
-
-		self.destroySpaceState = False
+		self.teamA = {}
+		self.teamB = {}
 
 		self.gameStateC = GameConstants.GAMESTATE_READY_GAME
-
-		self.herosCount  = {}
-		self.selectHeroState   = False
-		self.startBattleState  = False
+		self.startBattleState = False
 		#self.testFun()
 
 	def testFun(self):
@@ -82,12 +72,13 @@ class Room(KBEngine.Space):
 			self.gameStateC == GameConstants.GAMESTATE_PLAYING
 			for avatar in self.teamA.values():
 				avatar.client.onReadyBattle()
+
 			for avatar in self.teamB.values():
 				avatar.client.onReadyBattle()
+
 			self.addTimer(GameConfigs.GAME_READY_TIME, 0, TIMER_TYPE_READY)
 		else:
 			entityCall.client.onReadyBattle()
-		pass
 
 	def startBattle(self, entityCall):
 		pass
@@ -111,9 +102,9 @@ class Room(KBEngine.Space):
 		# 发送游戏结束状态
 		for avatar in self.teamA:
 			avatar.onPushStatisticalResult(winTeamId)
+
 		for avatar in self.teamB:
 			avatar.onPushStatisticalResult(winTeamId)
-
 
 		self.addTimer(1, 0, TIMER_TYPE_DESTROY)
 

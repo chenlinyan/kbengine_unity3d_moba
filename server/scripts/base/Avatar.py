@@ -162,23 +162,23 @@ class Avatar(KBEngine.Proxy):
 		"""
 		DEBUG_MSG("Avatar_base_reqJoinGame::[%s][%i]" %(self.cellData["name"], self.id))
 
-		returnFlag = self.joinMatch()
-
-		DEBUG_MSG("Avatar_base_reqJoinGame_returnFlag[%i]" % returnFlag)
+		resultFlag = self.joinMatch()
+		if not resultFlag:
+			DEBUG_MSG("Avatar_base_reqJoinGame::the result is fail!")
 
 		if self.client:
-			self.client.onJoinGameResult(returnFlag)
+			self.client.onJoinGameResult(resultFlag)
 
 	def reqExitGame(self):
 		"""
 		退出游戏
 		"""
-		returnFlag, exitResult = self.exitMatch()
-		if not returnFlag:
-			DEBUG_MSG("Avatar_base_reqExitGame_returnFlag[%s]" % exitResult)
+		resultFlag = self.exitMatch()
+		if not resultFlag:
+			DEBUG_MSG("Avatar_base_reqExitGame::the result is fail!")
 
 		if self.client:
-			self.client.onExitGameResult(returnFlag)
+			self.client.onExitGameResult(resultFlag)
 
 	def joinMatch(self):
 		"""
@@ -186,13 +186,13 @@ class Avatar(KBEngine.Proxy):
 		"""
 		self.gameState = GameConstants.GAMESTATE_MATCHING
 		playerData = {"entityCall":self, "id":self.id, "name":self.cellData["name"], "teamId": 0, "heroId": 0, "heroIdLst":self.cellData["heroIdLst"] }
-		matchResults = KBEngine.globalData["Halls"].joinMatch(self, playerData)
-		self.matchId = matchResults[0]
+		self.matchId = KBEngine.globalData["Halls"].joinMatch(self, playerData)
 
 		if self.matchId < 0:
+			DEBUG_MSG("Avatar_base_joinMatch::the result id fail!")
+
 			# 返回为-1,表明匹配失败
 			self.gameState = GameConstants.GAMESTATE_HALL
-			DEBUG_MSG("Avatar_base_joinMatch_errResult[%s]" % matchResult)
 			return False
 
 		return True
@@ -201,14 +201,14 @@ class Avatar(KBEngine.Proxy):
 		"""
 		退出匹配
 		"""
-		exitResults = KBEngine.globalData["Halls"].exitMatch(self.id, self.matchId)
-		if exitResults[0]:
+		if KBEngine.globalData["Halls"].exitMatch(self.id, self.matchId):
 			self.cellData["heroId"] = 0
 			self.cellData["teamId"] = 0
 			self.heroId = 0
 			self.gameState = GameConstants.GAMESTATE_HALL
+			return True
 
-		return exitResults
+		return False
 
 	def onRecvPlayersJoinMatch(self, playersData, state):
 		'''

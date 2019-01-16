@@ -31,4 +31,4 @@ class MatchRoomReport(KBEngine.EntityComponent):
 		'''
 		if entityId in self.players:
 			del self.players[entityId]
-			self.owner.fireEvent(eventNameLeaveRoom, entityCall)
+			self.owner.fireEvent(eventNameLeaveRoom, entityId)

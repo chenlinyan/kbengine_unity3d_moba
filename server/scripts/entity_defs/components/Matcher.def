@@ -22,11 +22,9 @@
 		<onRoomGetCell>
 			<Arg>				ENTITYCALL			</Arg>
 			<Arg>				MATCH_ID			</Arg>
-			<Arg>				SPACE_ID			</Arg>
 		</onRoomGetCell>
 		<onRoomDestory>
 			<Arg>				MATCH_ID			</Arg>
-			<Arg>				SPACE_ID			</Arg>
 		</onRoomDestory>
 	</BaseMethods>
 
