@@ -89,7 +89,7 @@ class Avatar(KBEngine.Proxy):
 		该entity被正式激活为可使用， 此时entity已经建立了client对应实体， 可以在此创建它的
 		cell部分。
 		"""
-		INFO_MSG("Avatar[%i] entities enable. EntityCall:%s" % (self.id, self.client))
+		INFO_MSG("Avatat_base_onClientEnabled::Avatar[%i] entities enable. EntityCall:%s" % (self.id, self.client))
 
 		# 如果异地重登调整帧数的计时器已经开启了，而玩家再次上线了,那么应该取消计时器
 		if self._adjustFrameIdTimer > 0:
@@ -311,7 +311,7 @@ class Avatar(KBEngine.Proxy):
 
 	def getSkillList(self, heroInfo):
 		if self.cell or heroInfo is None:
-			DEBUG_MSG("Avatar_base_getSkillIdList:: heroInfos is None!!!")
+			DEBUG_MSG("Avatar_base_getSkillIdList::heroInfos is None!!!")
 			return []
 
 		skillIdList = []
@@ -321,7 +321,7 @@ class Avatar(KBEngine.Proxy):
 		skillIdList.append(heroInfo["skill_4"])
 
 		if len(skillIdList) <= 0:
-			DEBUG_MSG("Avatar_base_getSkillIdList:: skillIdList len <= 0!!!")
+			DEBUG_MSG("Avatar_base_getSkillIdList::skillIdList len <= 0!!!")
 			return []
 
 		skillList = []

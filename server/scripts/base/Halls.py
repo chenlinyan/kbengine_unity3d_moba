@@ -18,7 +18,7 @@ class TeamMatchRule(MatchRule):
 		teamACount = 0
 		teamBCount = 0
 
-		DEBUG_MSG("TeamMatchRule_check:: str(%s)" % str(allPlayersData))
+		DEBUG_MSG("TeamMatchRule_check::str(%s)" % str(allPlayersData))
 
 		for existPlayer in allPlayersData:
 			if existPlayer["teamId"] == GameConfigs.TEAM_A_ID:
@@ -53,7 +53,7 @@ class TeamMatchRule(MatchRule):
 
 class HeroChooseRule(CreateRoomRule):
 	def check(self, matcher, allPlayersData):
-		DEBUG_MSG("HeroChooseRule_check:: str(%s)" % str(allPlayersData))
+		DEBUG_MSG("HeroChooseRule_check::str(%s)" % str(allPlayersData))
 
 		for existPlayer in allPlayersData:
 			if existPlayer["heroId"] == 0:
