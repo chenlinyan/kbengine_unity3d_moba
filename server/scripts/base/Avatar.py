@@ -33,7 +33,8 @@ class Avatar(KBEngine.Proxy):
 		self.disconnectFlag = False
 
 		# 获取cvs的配置数据对象
-		self.conf = CSV_Helper()
+		global g_conf
+		g_conf = CSV_Helper()
 
 		# 初始化为登录状态
 		self.gameState = GameConstants.GAMESTATE_LOGIN
@@ -185,7 +186,7 @@ class Avatar(KBEngine.Proxy):
 		加入匹配
 		"""
 		self.gameState = GameConstants.GAMESTATE_MATCHING
-		playerData = {"entityCall":self, "id":self.id, "name":self.cellData["name"], "teamId": 0, "heroId": 0, "heroIdLst":self.cellData["heroIdLst"] }
+		playerData = {"entityCall" : self, "id" : self.id, "name" : self.cellData["name"], "teamId" : 0, "heroId" : 0, "heroIdLst" : self.cellData["heroIdLst"]}
 		self.matchId = KBEngine.globalData["Halls"].joinMatch(self, playerData)
 
 		if self.matchId < 0:
@@ -263,7 +264,6 @@ class Avatar(KBEngine.Proxy):
 
 		if self.client:
 			self.client.onExitMatch(entityId)
-		pass
 
 	def acquireAllPlayersMatchData(self):
 		if self.matchId < 0:
@@ -304,10 +304,10 @@ class Avatar(KBEngine.Proxy):
 			self.client.onReqsChooseHeroResult(self.cellData["heroInfo"], self.cellData["skillInfosLst"])
 
 		#需要向当前的玩家所在的匹配池中修改数据
-		self.matchDataChanged(self, {"heroId":heroId})
+		self.matchDataChanged(self, {"heroId" : heroId})
 
 	def getHeroInfo(self, heroId):
-		return self.conf.getTable('d_hero.csv').get(heroId, None)
+		return g_conf.getTable('d_hero.csv').get(heroId, None)
 
 	def getSkillList(self, heroInfo):
 		if self.cell or heroInfo is None:
@@ -325,7 +325,7 @@ class Avatar(KBEngine.Proxy):
 			return []
 
 		skillList = []
-		tableInfos = self.conf.getTable('d_skill.csv')
+		tableInfos = g_conf.getTable('d_skill.csv')
 		for skillId in skillIdList:
 			skillList.append(tableInfos.get(skillId, None))
 
@@ -409,16 +409,16 @@ class Avatar(KBEngine.Proxy):
 
 	def transformMatchStateToGameState(self, matchState):
 		# 当前匹配对象中的匹配状态
-		# ID_MATCH_BEGIN = 0
-		# ID_MATCHING    = 1
-		# ID_MATCH_CREROOMRULE   = 2
-		# ID_MATCH_END   = 3
-		# ID_LOADING_TIME   = 4
-		# ID_ROOM_CREATION_BEGIN       = 5
-		# ID_ROOM_CREATION_COMPLETE    = 6
-		state = GameConstants.GAMESTATE_HALL
-
-		if matchState == 1:
+		# MATCH_STATE_BEGIN 				 = 0
+		# MATCH_STATE_MATCHING 				 = 1
+		# MATCH_STATE_MATCH_CREROOM_RULE 	 = 2
+		# MATCH_STATE_END 					 = 3
+		# MATCH_STATE_LOADING_TIME 			 = 4
+		# MATCH_STATE_ROOM_CREATION_BEGIN 	 = 5
+		# MATCH_STATE_ROOM_CREATION_COMPLETE = 6
+		if matchState == 0:
+			state = GameConstants.GAMESTATE_HALL
+		elif matchState == 1:
 			state = GameConstants.GAMESTATE_MATCHING
 		elif matchState == 2:
 			state = GameConstants.GAMESTATE_SELECT_HERO
@@ -431,6 +431,8 @@ class Avatar(KBEngine.Proxy):
 			state = GameConstants.GAMESTATE_READY_GAME
 		elif matchState == 6:
 			state = GameConstants.GAMESTATE_PLAYING
+		else:
+			assert state >= 0 and state <= 6,'输出了无效的匹配状态'
 
 		return state
 
@@ -438,5 +440,6 @@ class Avatar(KBEngine.Proxy):
 		# 玩家需要将帧数从0开始重新推送给客户端，为了确保玩家调整到battle界面并准备好,倒计数1秒后再调整帧数
 		if self._adjustFrameIdTimer != 0:
 			self.delTimer(self._adjustFrameIdTimer)
+
 		if self.cell:
 			self._adjustFrameIdTimer = self.addTimer(1, 0, TIMER_TYPE_ADJUST_FRAMEID)

@@ -169,13 +169,13 @@ class Matcher(KBEngine.EntityComponent):
 			return INVALIDID_MATCHID
 
 		# loadTimeOfBefCreRoom：表示创建房间前的等待加载时间
-		baseMatchArg = {"matchId": self.lastMatchId,
-						"matchName:": "defineName",
-						"state": MATCH_STATE_MATCHING,
+		baseMatchArg = {"matchId" : self.lastMatchId,
+						"matchName:" : "defineName",
+						"state" : MATCH_STATE_MATCHING,
 						"arriveMaxUser" : False,
 						"loadTimeOfBefCreRoom": self.befCreRoomLoadTime,
-						"autoOpenRoom": True,
-						"playersData":{}}
+						"autoOpenRoom" : True,
+						"playersData" : {}}
 
 		self.matchPools[self.lastMatchId] = baseMatchArg
 		self.matchIds.append(self.lastMatchId)
@@ -351,7 +351,7 @@ class Matcher(KBEngine.EntityComponent):
 
 		matchData = self.matchPools.get(matchId, None)
 		if matchData:
-			roomData = {"roomBaseEntityCall":roomEntityCall, "roomCellEntityCall":None, "roomKey":matchId }
+			roomData = {"roomBaseEntityCall" : roomEntityCall, "roomCellEntityCall" : None, "roomKey" : matchId}
 			matchData["roomData"] = roomData
 			matchData["state"] = MATCH_STATE_END
 
